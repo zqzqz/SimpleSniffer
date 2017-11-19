@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pcap.h>
+#include <netdb.h>
 #define PCAP_OPENFLAG_PROMISCUOUS 1
 #define PCAP_BUF_SIZE 2048
 
@@ -31,7 +32,7 @@ public:
     bool openDumpFile(const char* fileName);
     bool saveCaptureData();
     bool closeDumpFile();
-
+/*
     void test() {
         findAllNetDevs();
         std::cout<<pNetDevs->name<<endl;
@@ -40,7 +41,7 @@ public:
         openDumpFile("a.txt");
         capture();
         closeNetDevs();
-    }
+    }*/
 };
 
 

@@ -2,9 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "../src/sniffer.h"
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -18,8 +19,12 @@ public:
 private slots:
     void on_pushButton_clicked();
 
+    void on_start_clicked();
+
 private:
     Ui::MainWindow *ui;
+    Sniffer *sniffer;
+
 };
 
 #endif // MAINWINDOW_H

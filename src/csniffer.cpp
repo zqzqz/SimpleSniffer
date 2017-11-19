@@ -6,6 +6,7 @@
 #include <iostream>
 #include "log.h"
 
+
 Csniffer::Csniffer() {
     pNetDevs = NULL;
     pHandle = NULL;
@@ -89,6 +90,9 @@ bool Csniffer::openDumpFile(const char *fileName) {
     }
     if ((pDumpFile = pcap_dump_open(pHandle, fileName)) != NULL) {
         return true;
+    }
+    else {
+        LOG(pcap_geterr(pHandle));
     }
     return false;
 }

@@ -27,12 +27,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         src/main.cpp \
         src/mainwindow.cpp \
-    src/csniffer.cpp
+    src/csniffer.cpp \
+    src/sniffer.cpp \
+    src/networkchoice.cpp
 
 HEADERS += \
         src/mainwindow.h \
     src/csniffer.h \
-    src/log.h
+    src/log.h \
+    src/sniffer.h \
+    src/type.h \
+    src/networkchoice.h
 
 FORMS += \
         ui/mainwindow.ui \
