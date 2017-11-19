@@ -1,10 +1,10 @@
-#Linux Sniffer (homework)
+# Linux Sniffer (homework)
 
 
-##Dependency
+## Dependency
 * qt 5
 * libpcap
 * OS: linux
 
-##Comments
+## Comments
 Unfinished
