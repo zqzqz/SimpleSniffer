@@ -8,7 +8,6 @@
 
 //Get, analysis and save network info
 bool Sniffer::getNetDevInfo() {
-    std::cout<<"fuck";
     if (pNetDevs == NULL) {
         if (findAllNetDevs() == false) {
             LOG("no available interfaces");
@@ -70,4 +69,8 @@ void Sniffer::testPrint() {
     for (std::vector<NetDevInfo>::iterator i = netDevInfo.begin(); i<netDevInfo.end(); i++) {
         std::cout<<i->strNetDevname<<endl<<i->strNetDevDescribe<<endl<<i->strIPV4FamilyName<<": "<<i->strIPV4Addr<<endl<<i->strIPV6FamilyName<<": "<<i->strIPV6Addr<<endl;
     }
+}
+
+bool Sniffer::captureOnce() {
+    return capture();
 }

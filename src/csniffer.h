@@ -13,25 +13,28 @@
 using namespace std;
 
 class Csniffer {
-public:
+protected:
     struct pcap_pkthdr *header;
     const u_char *pktData;
     pcap_if_t *pNetDevs;
     pcap_t *pHandle;
     pcap_dumper_t *pDumpFile;
-    char err[PCAP_BUF_SIZE];
 
+    bool findAllNetDevs();
+    bool capture();
+
+public:
     Csniffer();
     ~Csniffer();
-    bool findAllNetDevs();
+    bool openDumpFile(const char* fileName);
+    bool saveCaptureData();
+    bool closeDumpFile();
     bool freeNetDevs();
     bool closeNetDevs();
     bool openNetDev(char *devName, int flag=PCAP_OPENFLAG_PROMISCUOUS, int lengthLimit = 65536);
     bool setCaptureConfig(const char* config);
-    bool capture();
-    bool openDumpFile(const char* fileName);
-    bool saveCaptureData();
-    bool closeDumpFile();
+    char err[PCAP_BUF_SIZE];
+
 /*
     void test() {
         findAllNetDevs();

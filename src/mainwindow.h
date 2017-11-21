@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include "../src/sniffer.h"
+#include "networkchoice.h"
+#include <unistd.h>
 
 namespace Ui {
     class MainWindow;
@@ -21,10 +23,12 @@ private slots:
 
     void on_start_clicked();
 
+    void on_chooseNetButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
-
+    NetworkChoice *netDevDialog;
 };
 
 #endif // MAINWINDOW_H

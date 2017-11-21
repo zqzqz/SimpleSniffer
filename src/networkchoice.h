@@ -3,24 +3,28 @@
 
 #include <QDialog>
 #include "../src/sniffer.h"
-
-namespace Ui {
-    class NetworkChoice;
-}
+#include "ui_networkchoice.h"
 
 class NetworkChoice : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit NetworkChoice(QWidget *parent = 0);
+    explicit NetworkChoice(Sniffer *snifferObj, QWidget *parent = 0);
     ~NetworkChoice();
 
 private slots:
 
+    void on_choiceBox_activated(const QString &arg1);
+
+    void on_buttonBox_accepted();
+
 private:
     Ui::NetworkChoice *ui;
+    void addNetDevs();
+    void showCurrentNetInfo(const QString &netName);
     Sniffer *sniffer;
+    std::vector<NetDevInfo>::iterator netIndex;
 };
 
 #endif // NETWORKCHOICE_H
