@@ -30,7 +30,8 @@ SOURCES += \
     src/csniffer.cpp \
     src/sniffer.cpp \
     src/networkchoice.cpp \
-    src/capturethread.cpp
+    src/capturethread.cpp \
+    src/packet.cpp
 
 HEADERS += \
         src/mainwindow.h \
@@ -39,7 +40,8 @@ HEADERS += \
     src/sniffer.h \
     src/type.h \
     src/networkchoice.h \
-    src/capturethread.h
+    src/capturethread.h \
+    src/packet.h
 
 FORMS += \
         ui/mainwindow.ui \

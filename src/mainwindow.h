@@ -2,9 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "../src/sniffer.h"
+#include "sniffer.h"
 #include "networkchoice.h"
 #include <unistd.h>
+#include "capturethread.h"
+#include "ui_mainwindow.h"
+#include "QtWidgets/QMessageBox"
+#include "QtWidgets/QFileDialog"
 
 namespace Ui {
     class MainWindow;
@@ -25,10 +29,22 @@ private slots:
 
     void on_chooseNetButton_clicked();
 
+    void quit();
+
+    void save();
+
+    void open();
+
+    void about();
+
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
     NetworkChoice *netDevDialog;
+    CaptureThread *captureThread;
+    QString currentFile;
+    bool saveFile(QString saveFileName);
+    bool openFile(QString openFileName);
 };
 
 #endif // MAINWINDOW_H

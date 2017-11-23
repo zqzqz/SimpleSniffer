@@ -75,20 +75,21 @@
    </property>
    <widget class="QMenu" name="menuSniffer">
     <property name="title">
-     <string>start</string>
+     <string>File</string>
     </property>
-    <addaction name="actionback"/>
-    <addaction name="actionquit"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuabout">
     <property name="title">
-     <string>about</string>
+     <string>About</string>
     </property>
-    <addaction name="actionOur_team"/>
+    <addaction name="actionOurTeam"/>
    </widget>
    <widget class="QMenu" name="menuhelp">
     <property name="title">
-     <string>help</string>
+     <string>Help</string>
     </property>
     <addaction name="actionDocument"/>
     <addaction name="actionQuick_start"/>
@@ -116,17 +117,17 @@
     <string>stop</string>
    </property>
   </action>
-  <action name="actionback">
+  <action name="actionSave">
    <property name="text">
-    <string>back</string>
+    <string>Save</string>
    </property>
   </action>
-  <action name="actionquit">
+  <action name="actionOpen">
    <property name="text">
-    <string>quit</string>
+    <string>Open</string>
    </property>
   </action>
-  <action name="actionOur_team">
+  <action name="actionOurTeam">
    <property name="text">
     <string>Our team</string>
    </property>
@@ -139,6 +140,11 @@
   <action name="actionQuick_start">
    <property name="text">
     <string>Quick start</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>

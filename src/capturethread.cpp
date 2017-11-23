@@ -1,11 +1,20 @@
 #include "capturethread.h"
 #include "sniffer.h"
 
-CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename)
+namespace Ui {
+    class MainWindow;
+}
+CaptureThread::CaptureThread()
+{
+
+}
+
+CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename, Ui::MainWindow *window)
 {
     bstop = false;
     sniffer = psniffer;
     filename = tmpfilename;
+    ui = window;
 }
 
 void CaptureThread::stop()
