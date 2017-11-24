@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = sniffer
 TEMPLATE = app
 LIBS += -lpcap
+QMAKE_CXXFLAGS += -std=c++11
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -31,7 +32,8 @@ SOURCES += \
     src/sniffer.cpp \
     src/networkchoice.cpp \
     src/capturethread.cpp \
-    src/packet.cpp
+    src/packet.cpp \
+    src/filter.cpp
 
 HEADERS += \
         src/mainwindow.h \
@@ -41,7 +43,8 @@ HEADERS += \
     src/type.h \
     src/networkchoice.h \
     src/capturethread.h \
-    src/packet.h
+    src/packet.h \
+    src/filter.h
 
 FORMS += \
         ui/mainwindow.ui \

@@ -9,10 +9,12 @@
 #include "ui_mainwindow.h"
 #include "QtWidgets/QMessageBox"
 #include "QtWidgets/QFileDialog"
+#include "filter.h"
 
 namespace Ui {
     class MainWindow;
 }
+class Filter;
 
 class MainWindow : public QMainWindow
 {
@@ -37,14 +39,22 @@ private slots:
 
     void about();
 
+    void on_filter_textChanged(const QString &arg1);
+
+    void on_filter_returnPressed();
+
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
+    QString currentFile;
     NetworkChoice *netDevDialog;
     CaptureThread *captureThread;
-    QString currentFile;
+    Filter *filter;
+    bool snifferStatus; //true for running; false for stopped;
+
     bool saveFile(QString saveFileName);
     bool openFile(QString openFileName);
+    bool changeFile(QString newFileName);
 };
 
 #endif // MAINWINDOW_H

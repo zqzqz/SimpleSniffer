@@ -3,6 +3,7 @@
 #include "csniffer.h"
 #include "networkchoice.h"
 #include "log.h"
+#include <unistd.h>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -13,6 +14,9 @@ MainWindow::MainWindow(QWidget *parent) :
     sniffer = new Sniffer();
     currentFile = "default.pcap";
     netDevDialog = new NetworkChoice(sniffer, this);
+    snifferStatus = false;
+    filter = new Filter();
+
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(quit()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(open()));
@@ -26,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete sniffer;
+    delete filter;
 }
 
 /*
@@ -42,10 +48,22 @@ void MainWindow::on_pushButton_clicked()
  */
 void MainWindow::on_start_clicked()
 {
-    sniffer->openNetDev(sniffer->currentNetName.toLatin1().data());
-    sniffer->openDumpFile(currentFile.toLatin1().data());
-    sniffer->captureOnce(); //test
-    sniffer->saveCaptureData();
+    if (! snifferStatus) {
+        snifferStatus = true;
+        ui->start->setText(tr("Stop"));
+
+        sniffer->openNetDev(sniffer->currentNetName.toLatin1().data());
+        changeFile("default.pcap");
+
+        for(int i=0; i<10; i++) {
+            sniffer->captureOnce(); //test
+            sniffer->saveCaptureData();
+        }
+    }
+    else {
+        snifferStatus = false;
+        ui->start->setText(tr("Start"));
+    }
     //captureThread = new CaptureThread(sniffer, filename, ui);
     //captureThread->run();
 }
@@ -57,6 +75,7 @@ void MainWindow::on_start_clicked()
 void MainWindow::on_chooseNetButton_clicked()
 {
     if (netDevDialog->exec() == QDialog::Accepted) {
+        sniffer->freeNetDevs();
         ui->netLabel->setText(sniffer->currentNetName);
     }
 }
@@ -68,6 +87,10 @@ void MainWindow::quit()
     }
 }
 
+/*
+ * funcion connected to label action 'Save'
+ * save current file to a selected name. call saveFile.
+ */
 void MainWindow::save()
 {
     QString saveFileName = QFileDialog::getSaveFileName(this, tr("Save As ... "), ".", tr("Sniffer captured data (*.pcap)"));
@@ -78,9 +101,20 @@ void MainWindow::save()
 
 bool MainWindow::saveFile(QString saveFileName)
 {
+    if (currentFile.isEmpty()) {
+        return false;
+    }
+    if (!QFile::copy(currentFile, saveFileName)) {
+        QMessageBox::warning(this, tr("Open As ... "), tr("<h3>ERROR Opening File</h3><p>A error occurs when opening the file.</p>"), QMessageBox::Ok);
+        return false;
+    }
     return false;
 }
 
+/*
+ * funcion connected to label action 'Open'
+ * Open a selected file as current file. call openFile.
+ */
 void MainWindow::open()
 {
     QString saveFileName = QFileDialog::getOpenFileName(this, tr("Open ... "), ".", tr("Sniffer captured data (*.pcap)"));
@@ -89,12 +123,30 @@ void MainWindow::open()
             QMessageBox::warning(this, tr("Open Error"),
                       tr("<h3>Open File Error</h3><p>Something wrong taken place when opening the file"));
         }
+        else {
+            changeFile(saveFileName);
+        }
     }
 }
 
 bool MainWindow::openFile(QString openFileName)
 {
+    //load data here
+    LOG(openFileName.toLatin1().data());
     return false;
+}
+
+bool MainWindow::changeFile(QString newFileName)
+{
+    sniffer->closeDumpFile();
+    if (! sniffer->openDumpFile(newFileName.toLatin1().data())) {
+        LOG("open file error");
+        return false;
+    }
+    else {
+        currentFile = newFileName;
+    }
+    return true;
 }
 
 void MainWindow::about()
@@ -102,3 +154,25 @@ void MainWindow::about()
     QMessageBox::about(this, tr("About Our Team"), tr("Collaborators: Zhengyu Yang & Qingzhao Zhang"));
 }
 
+/*
+ * filter control functions
+ * when text changes, check the syntax.
+ * when RETURN pressed, launch the filter.
+ */
+void MainWindow::on_filter_textChanged(const QString &command)
+{
+    QPalette palette;
+    if (filter->checkCommand(command)) {
+        palette.setColor(QPalette::Base, Qt::green);
+    }
+    else {
+        palette.setColor(QPalette::Base, Qt::red);
+    }
+    ui->filter->setPalette(palette);
+}
+
+void MainWindow::on_filter_returnPressed()
+{
+    filter->filtrate(ui->filter->text(), ui->listView);
+    filter->printQuery();
+}
