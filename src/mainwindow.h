@@ -5,6 +5,7 @@
 #include "../src/sniffer.h"
 #include "networkchoice.h"
 #include <unistd.h>
+#include "capturethread.h"
 
 namespace Ui {
     class MainWindow;
@@ -19,16 +20,24 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+    //void on_pushButton_clicked();
 
     void on_start_clicked();
 
+    void on_stop_clicked();
+
     void on_chooseNetButton_clicked();
+
+    void showInfoInListView();
+
+public slots:
+    void recieveSnifferInfoToUi(SnifferData&);
 
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
     NetworkChoice *netDevDialog;
+    CaptureThread *pCaptureThread;
 };
 
 #endif // MAINWINDOW_H

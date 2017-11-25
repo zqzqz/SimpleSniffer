@@ -71,6 +71,13 @@ void Sniffer::testPrint() {
     }
 }
 
-bool Sniffer::captureOnce() {
+int Sniffer::captureOnce() {
     return capture();
+}
+
+bool Sniffer::openNetDevInSniffer()
+{
+    QByteArray tmpCurrentNetName = currentNetName.toLatin1();
+    char *chCurrentNetName=tmpCurrentNetName.data();
+    return openNetDev(chCurrentNetName);
 }

@@ -5,7 +5,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
+    MainWindow w;  //need a qmainwindow to initialize it?
     w.show();
     return a.exec();
 }

@@ -76,7 +76,7 @@ bool Csniffer::setCaptureConfig(const char *config) {
     return true;
 }
 
-bool Csniffer::capture() {
+int Csniffer::capture() {
     int captureResult = pcap_next_ex(pHandle, &header, &pktData);
     if (pDumpFile != NULL) {
         saveCaptureData();
