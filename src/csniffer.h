@@ -6,22 +6,24 @@
 #include <netinet/in.h>
 #include <pcap.h>
 #include <netdb.h>
-#define PCAP_OPENFLAG_PROMISCUOUS 1
+#define PCAP_OPENFLAG_PROMISCUOUS 1  //set the mode promiscuous
 #define PCAP_BUF_SIZE 2048
+//#include "capturethread.h"
 
 #include <iostream>
 using namespace std;
 
 class Csniffer {
 protected:
+    //friend class CaptureThread;
     struct pcap_pkthdr *header;
     const u_char *pktData;
     pcap_if_t *pNetDevs;
     pcap_t *pHandle;
-    pcap_dumper_t *pDumpFile;
+    pcap_dumper_t *pDumpFile; //the file to save packet
 
     bool findAllNetDevs();
-    bool capture();
+    int capture();   //change from bool to int
 
 public:
     Csniffer();

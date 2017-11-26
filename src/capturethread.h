@@ -2,9 +2,8 @@
 #define CAPTURETHREAD_H
 
 #include <QThread>
-#include "packet.h"
-#include <vector>
 
+#include "type.h"
 class Sniffer;
 namespace Ui {
     class MainWindow;
@@ -18,7 +17,10 @@ public:
     CaptureThread(Sniffer *psniffer, QString filename, Ui::MainWindow *ui);
     void stop();
     void run();
-    //save Packet objects
+    void setCondition();
+    bool getCondition();
+signals:
+    void sendSnifferInfoToUi(SnifferData*);
 private:
     volatile bool bstop;
     Sniffer *sniffer;

@@ -15,36 +15,11 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1">
-       <widget class="QLabel" name="netLabel">
-        <property name="text">
-         <string>TextLabel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QPushButton" name="start">
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="chooseNetButton">
-        <property name="text">
-         <string>Network</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="filter"/>
-      </item>
-     </layout>
-    </item>
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="2" column="1">
+       <widget class="QTextBrowser" name="textBrowser"/>
+      </item>
       <item row="2" column="0">
        <widget class="QTreeWidget" name="treeWidget">
         <column>
@@ -54,11 +29,53 @@
         </column>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QTextBrowser" name="textBrowser"/>
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="2" column="0">
+         <widget class="QPushButton" name="start">
+          <property name="text">
+           <string>Start</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="chooseNetButton">
+          <property name="text">
+           <string>Network</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLineEdit" name="filter"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="stop">
+          <property name="text">
+           <string>Stop</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QLabel" name="netLabel">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item row="1" column="0" colspan="2">
-       <widget class="QListView" name="listView"/>
+       <widget class="QTableView" name="tableView">
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -70,7 +87,7 @@
      <x>0</x>
      <y>0</y>
      <width>996</width>
-     <height>22</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSniffer">

@@ -17,7 +17,11 @@ private slots:
 
     void on_choiceBox_activated(const QString &arg1);
 
-    void on_buttonBox_accepted();
+    //void on_buttonBox_accepted();
+
+    void on_buttonBox_clicked();
+
+
 
 private:
     Ui::NetworkChoice *ui;

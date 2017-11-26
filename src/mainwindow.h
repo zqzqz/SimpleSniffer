@@ -10,6 +10,7 @@
 #include "QtWidgets/QMessageBox"
 #include "QtWidgets/QFileDialog"
 #include "filter.h"
+#include <QtGui>
 
 namespace Ui {
     class MainWindow;
@@ -25,9 +26,11 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+    //void on_pushButton_clicked();
 
     void on_start_clicked();
+
+    void on_stop_clicked();
 
     void on_chooseNetButton_clicked();
 
@@ -42,6 +45,10 @@ private slots:
     void on_filter_textChanged(const QString &arg1);
 
     void on_filter_returnPressed();
+    void showInfoInListView();
+
+public slots:
+    void recieveSnifferInfoToUi(SnifferData*);
 
 private:
     Ui::MainWindow *ui;
@@ -55,6 +62,9 @@ private:
     bool saveFile(QString saveFileName);
     bool openFile(QString openFileName);
     bool changeFile(QString newFileName);
+    CaptureThread *pCaptureThread;
+    QStandardItemModel *modelForTableView;
+    int tableRow;
 };
 
 #endif // MAINWINDOW_H

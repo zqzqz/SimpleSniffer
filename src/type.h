@@ -17,10 +17,10 @@ typedef struct _arp_header
     unsigned char arp_hln;		// 硬件地址长度
     unsigned char arp_pln;		// 协议地址长度
     unsigned short arp_op;		// ARP操作类型
-    unsigned char arp_sha[6];	// 发送者的硬件地址
-    unsigned long arp_spa;		// 发送者的协议地址
-    unsigned char arp_tha[6];	// 目标的硬件地址
-    unsigned long arp_tpa;		// 目标的协议地址
+    unsigned char arp_sha[6];	// 发送者的硬件地址,不管了，eth_header中已经处理
+    unsigned char arp_spa[4];		// 发送者的协议地址
+    unsigned char arp_tha[6];	// 目标的硬件地址，不管了，eth_header中已经处理
+    unsigned char arp_tpa[4];		// 目标的协议地址
 }arp_header;
 
 // IP 协议头 协议(Protocol) 字段标识含义
@@ -30,7 +30,7 @@ typedef struct _arp_header
 #define ICMP_SIG		(1)
 #define IGMP_SIG		(2)
 #define GGP_SIG			(3)
-#define IP_ENCAP_SIG	(4)
+#define IP_ENCAP_SIG	        (4)
 #define ST_SIG			(5)
 #define TCP_SIG			(6)
 #define EGP_SIG			(8)
@@ -42,12 +42,18 @@ typedef struct _arp_header
 #define TP4_SIG			(29)
 #define XTP_SIG			(36)
 #define DDP_SIG			(37)
-#define IDPR_CMTP_SIG	(39)
+#define IDPR_CMTP_SIG	        (39)
 #define RSPF_SIG		(73)
 #define VMTP_SIG		(81)
 #define OSPFIGP_SIG		(89)
 #define IPIP_SIG		(94)
 #define ENCAP_SIG		(98)
+
+
+//以太网帧类型　　　　　　　　　对应编码
+#define EPT_IP                (2048)
+#define EPT_ARP               (2054)   
+
 
 // IPv4头部（20字节）
 typedef struct _ip_header
@@ -89,11 +95,20 @@ typedef struct _udp_header
     unsigned short	crc;		// 校验和(Checksum)
 }udp_header;
 
+//icmp头部
+typedef struct _icmp_header
+{
+    unsigned short     type;
+    unsigned short     code;
+    unsigned int       crc;
+    
+}icmp_header;
+
 // 定义一些应用层协议使用的端口号
 
 // TCP 协议
 #define FTP_PORT 		(21)
-#define TELNET_PORT 	(23)
+#define TELNET_PORT 	　　　　　　　　(23)
 #define SMTP_PORT 		(25)
 #define HTTP_PORT  		(80)
 #define HTTPS_PORT		(443)
@@ -117,7 +132,7 @@ struct NetDevInfo
 
 #include <QString>
 
-// 树形显示结果的数据结构
+// 树形显示结果的数据结构，这个数据结构可能需要改一波，不然配不上arp
 struct AnalyseProtoType
 {
     QString 	strEthTitle;		// 数据链路层
@@ -125,7 +140,7 @@ struct AnalyseProtoType
     QString 	strSMac;
     QString 	strType;
 
-    QString 	strIPTitle;			// 网络层
+    QString 	strNetTitle;			// 网络层
     QString 	strVersion;
     QString 	strHeadLength;
     QString 	strLength;
@@ -143,11 +158,11 @@ struct AnalyseProtoType
     void init()
     {
         strEthTitle   = "数据链路层 - Ethrmet II";
-        strDMac       = "目标MAC地址：";
-        strSMac       = "来源MAC地址：";
-        strType       = "以太网类型：Internet Protocol (0x0800)";
+        strDMac       = "";
+        strSMac       = "";
+        strType       = "以太网类型：";
 
-        strIPTitle    = "网络层 - IP 协议 (Internet Protocol)";
+        strNetTitle    = "网络层 - ";
         strVersion    = "版本：IPv4";
         strHeadLength = "协议头长度：";
         strLength     = "总长：";
@@ -171,7 +186,7 @@ struct SnifferData
     QString 			strSIP;			// 来源 IP 地址，格式 IP:port
     QString 			strDIP;			// 目标 IP 地址，格式 IP:port
     QString 			strProto;		// 使用的协议
-    QString				strLength;		// 数据长度
+    QString		        strLength;		// 数据长度
     QByteArray  		strData;		// 原始数据
     AnalyseProtoType	protoInfo;		// 树形显示结果的数据结构
 };

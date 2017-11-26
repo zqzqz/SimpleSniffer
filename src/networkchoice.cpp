@@ -40,6 +40,7 @@ void NetworkChoice::showCurrentNetInfo(const QString &netDevName) {
             ui->IPinfoView->insertPlainText(i->strNetDevDescribe.data());
         }
     }
+    LOG("i love you");
 }
 
 /*
@@ -72,7 +73,14 @@ void NetworkChoice::addNetDevs()
 }
 
 
-void NetworkChoice::on_buttonBox_accepted()
+/*void NetworkChoice::on_buttonBox_accepted()
+{
+    sniffer->currentNetName = ui->choiceBox->currentText();
+}
+*/
+
+
+void NetworkChoice::on_buttonBox_clicked()
 {
     sniffer->currentNetName = ui->choiceBox->currentText();
 }
