@@ -30,7 +30,7 @@ void CaptureThread::run()
 {   //open net device && capture packet && save
 
     int res;//save the result of catth packet
-    SnifferData tmpSnifferData;
+
     QByteArray      rawByteData;
     int             num=1;
     char            sizeNum[10];
@@ -62,6 +62,7 @@ void CaptureThread::run()
     sniffer->snifferData.clear();  //snifferdata is a vector
 
     while (bstop!=true &&(res=sniffer->captureOnce())>=0) {
+        SnifferData tmpSnifferData;
         // out of time,wait for packet
         if(res==0) {
             LOG("wait for packet");
@@ -72,6 +73,10 @@ void CaptureThread::run()
         LOG("start capture");
 
         sniffer->saveCaptureData();   //write raw info to the file named filename
+
+        if(sniffer->snifferData.size()>=10) {
+            sniffer->snifferData.clear();
+        }
         tmpSnifferData.protoInfo.init();
 
         rawByteData.clear();
@@ -103,6 +108,9 @@ void CaptureThread::run()
         _tcp_header   *tcph;
         _udp_header   *udph;
         _icmp_header  *icmph;
+
+        int flag=0;
+
         unsigned short sport,dport;
         unsigned short arp_hard_type,arp_protocol_type;
         unsigned char  arp_hard_length,arp_protocol_length;           //maybe used later
@@ -131,12 +139,15 @@ void CaptureThread::run()
 
         //Second get ip header
 
-        if((eth->eth_type)==EPT_IP) {
+       if(htons(eth->eth_type)==2048) {     //there is somthing wrong about this sentence
 
             LOG("it is IP packet");
 
+            flag=1;
+
             tmpSnifferData.protoInfo.strType+="Internet Protocol (0x0800)";
             tmpSnifferData.protoInfo.strNetTitle+="Internet Prtocol";
+
 
             iph=(_ip_header*)(sniffer->pktData+14);
 
@@ -169,11 +180,11 @@ void CaptureThread::run()
 
                 if(sport==FTP_PORT||dport==FTP_PORT) {
                     tmpSnifferData.strProto+="(FTP)";
-                    tmpSnifferData.protoInfo.strAppProto+="FTP (File Transfer Protocol)";
-                } else if(sport==TELNET_PORT||dport==TELNET_PORT) {
+                    tmpSnifferData.protoInfo.strAppProto+="FTP(File Transfer Protocol)";
+                }/*else if(sport==TELNET_PORT||dport==TELNET_PORT){
                     tmpSnifferData.strProto+="(TELNET)";
                     tmpSnifferData.protoInfo.strAppProto+="TELNET";
-                } else if (sport ==SMTP_PORT||dport==SMTP_PORT) {
+                }*/ else if (sport ==SMTP_PORT||dport==SMTP_PORT) {
                     tmpSnifferData.strProto+="(SMTP)";
                     tmpSnifferData.protoInfo.strAppProto+="SMTP(Simple Message Transfer Protocol)";
                 } else if(sport==POP3_PORT||dport==POP3_PORT) {
@@ -223,6 +234,7 @@ void CaptureThread::run()
                 } else {
                     tmpSnifferData.protoInfo.strAppProto += "Unknown Proto";
                 }
+                break;
             default:
                 LOG("Nothing captured!!!");
                 continue;
@@ -242,12 +254,15 @@ void CaptureThread::run()
             tmpSnifferData.protoInfo.strSPort+=sizeSrcPort;
             tmpSnifferData.protoInfo.strDPort+=sizeDstPort;
 
-        } else if((eth->eth_type)==EPT_ARP) {
+        }else if(htons(eth->eth_type)==2054) {
 
             LOG("it is arp packet")
 
+            flag=1;
+
             tmpSnifferData.protoInfo.strType+="Address Resolution Protocol (0x0806)";
             tmpSnifferData.protoInfo.strNetTitle+="Address Resolution Protocol";
+            tmpSnifferData.strProto="ARP";
             //get arp protocol header
             arph=(_arp_header *)(sniffer->pktData+14);
 
@@ -272,7 +287,7 @@ void CaptureThread::run()
             }else if(arph->arp_op==0x0002) {
                 //reply packet
             } else {
-                LOG("there is something wrong with the arp packet")
+                //LOG("there is something wrong with the arp packet")
             }
 
             tmpSnifferData.strSIP=arpSrcProtocolAddr;
@@ -287,7 +302,10 @@ void CaptureThread::run()
 
         sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
-        emit sendSnifferInfoToUi(&(sniffer->snifferData));
+        if(flag) {
+            emit sendSnifferInfoToUi(&tmpSnifferData);
+        }
+        LOG("emit");
 
         LOG((string)tmpSnifferData.strSIP.toStdString());
         LOG((string)tmpSnifferData.strDIP.toStdString());
@@ -302,8 +320,7 @@ void CaptureThread::run()
     }
 
 
-
-
       //core function of capturing packets
       //add recursive code here.
 }
+

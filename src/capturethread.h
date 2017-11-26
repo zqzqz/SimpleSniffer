@@ -15,7 +15,7 @@ public:
     void setCondition();
     bool getCondition();
 signals:
-    void sendSnifferInfoToUi(SnifferData&);
+    void sendSnifferInfoToUi(SnifferData*);
 private:
     volatile bool bstop;
     Sniffer *sniffer;

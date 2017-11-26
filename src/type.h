@@ -17,9 +17,9 @@ typedef struct _arp_header
     unsigned char arp_hln;		// 硬件地址长度
     unsigned char arp_pln;		// 协议地址长度
     unsigned short arp_op;		// ARP操作类型
-    unsigned char arp_sha[6];	// 发送者的硬件地址
+    unsigned char arp_sha[6];	// 发送者的硬件地址,不管了，eth_header中已经处理
     unsigned char arp_spa[4];		// 发送者的协议地址
-    unsigned char arp_tha[6];	// 目标的硬件地址
+    unsigned char arp_tha[6];	// 目标的硬件地址，不管了，eth_header中已经处理
     unsigned char arp_tpa[4];		// 目标的协议地址
 }arp_header;
 
@@ -51,8 +51,8 @@ typedef struct _arp_header
 
 
 //以太网帧类型　　　　　　　　　对应编码
-#define EPT_IP                0x0800
-#define EPT_ARP               0x0806   
+#define EPT_IP                (2048)
+#define EPT_ARP               (2054)   
 
 
 // IPv4头部（20字节）
@@ -108,7 +108,7 @@ typedef struct _icmp_header
 
 // TCP 协议
 #define FTP_PORT 		(21)
-#define TELNET_PORT 	(23)
+#define TELNET_PORT 	　　　　　　　　(23)
 #define SMTP_PORT 		(25)
 #define HTTP_PORT  		(80)
 #define HTTPS_PORT		(443)
@@ -132,7 +132,7 @@ struct NetDevInfo
 
 #include <QString>
 
-// 树形显示结果的数据结构，这个数据结构应该需要改一波，不然配不上ａｒｐ
+// 树形显示结果的数据结构，这个数据结构可能需要改一波，不然配不上arp
 struct AnalyseProtoType
 {
     QString 	strEthTitle;		// 数据链路层
@@ -158,8 +158,8 @@ struct AnalyseProtoType
     void init()
     {
         strEthTitle   = "数据链路层 - Ethrmet II";
-        strDMac       = "目标MAC地址：";
-        strSMac       = "来源MAC地址：";
+        strDMac       = "";
+        strSMac       = "";
         strType       = "以太网类型：";
 
         strNetTitle    = "网络层 - ";

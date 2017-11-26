@@ -6,6 +6,7 @@
 #include "networkchoice.h"
 #include <unistd.h>
 #include "capturethread.h"
+#include <QtGui>
 
 namespace Ui {
     class MainWindow;
@@ -31,13 +32,15 @@ private slots:
     void showInfoInListView();
 
 public slots:
-    void recieveSnifferInfoToUi(SnifferData&);
+    void recieveSnifferInfoToUi(SnifferData*);
 
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
     NetworkChoice *netDevDialog;
     CaptureThread *pCaptureThread;
+    QStandardItemModel *modelForTableView;
+    int tableRow;
 };
 
 #endif // MAINWINDOW_H
