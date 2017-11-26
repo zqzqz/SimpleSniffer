@@ -14,7 +14,7 @@ class CaptureThread : public QThread
     Q_OBJECT
 public:
     CaptureThread();
-    CaptureThread(Sniffer *psniffer, QString filename, Ui::MainWindow *ui);
+    CaptureThread(Sniffer *psniffer, QString filename);
     void stop();
     void run();
     void setCondition();

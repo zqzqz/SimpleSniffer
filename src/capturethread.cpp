@@ -12,12 +12,11 @@ CaptureThread::CaptureThread()
 
 }
 
-CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename, Ui::MainWindow *window)
+CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename)
 {
     bstop = false;
     sniffer = psniffer;
     filename = tmpfilename;
-    ui = window;
 }
 
 void CaptureThread::setCondition()
@@ -327,9 +326,5 @@ void CaptureThread::run()
 
 
     }
-
-
-      //core function of capturing packets
-      //add recursive code here.
 }
 

@@ -95,7 +95,7 @@ void MainWindow::on_pushButton_clicked()
  * unfinished; use threads in the future
  */
 void MainWindow::on_start_clicked()
-{
+{/*
     if (! snifferStatus) {
         snifferStatus = true;
         ui->start->setText(tr("Stop"));
@@ -111,10 +111,10 @@ void MainWindow::on_start_clicked()
     else {
         snifferStatus = false;
         ui->start->setText(tr("Start"));
-    }
+    }*/
     //captureThread = new CaptureThread(sniffer, filename, ui);
     //captureThread->run();
-{      
+
     /*if (pCaptureThread!=NULL) {
 
         //disconnect(pCaptureThread,SIGNAL(CaptureThread::sendSnifferInfoToUi(SnifferData*)),this, SLOT(recieveSnifferInfoToUi(SnifferData*)));
@@ -257,7 +257,7 @@ void MainWindow::on_filter_textChanged(const QString &command)
 
 void MainWindow::on_filter_returnPressed()
 {
-    filter->filtrate(ui->filter->text(), ui->listView);
+    filter->filtrate(ui->filter->text(), ui->tableView);
     filter->printQuery();
 }
 

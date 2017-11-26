@@ -3,6 +3,7 @@
 #include "mainwindow.h"
 #include "log.h"
 #include <string.h>
+#include <QTableView>
 #include <regex>
 #include <map>
 
@@ -12,13 +13,13 @@ public:
     Filter();
     ~Filter();
     bool checkCommand(QString command);
-    bool filtrate(QString command, QListView* pListView);
+    bool filtrate(QString command, QTableView* pTableView);
     void printQuery(); //test
 
 private:
     map<string, string> query;
     bool loadCommand(QString command);
-    void launchFilter(QListView* pListView);
+    void launchFilter(QTableView* pListView);
     string findWord(string com, size_t pos);
 
 };

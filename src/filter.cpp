@@ -59,12 +59,12 @@ string Filter::findWord(string com, size_t pos)
     return com.substr(beg, end-beg);
 }
 
-void Filter::launchFilter(QListView *pListView) {
+void Filter::launchFilter(QTableView *pListView) {
     //add code here
 }
 
 
-bool Filter::filtrate(QString command, QListView *pListView) {
+bool Filter::filtrate(QString command, QTableView *pListView) {
     if (! loadCommand(command)) {
         return false;
     }
