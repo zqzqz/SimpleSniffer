@@ -61,16 +61,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView->setFixedWidth(90*2+150*5);
 
-
-    //connect(pCaptureThread,SIGNAL(sendSnifferInfoToUi(SnifferData*)),this, SLOT(recieveSnifferInfoToUi(SnifferData*)));
-    //LOG("CONNECT");
-
-    ui->start->setEnabled(true);
-    ui->stop->setEnabled(false);
-
-
-    // there is some bug
-    //connect(&pCaptureThread,SIGNAL(sendSnifferInfoToUi(SnifferData*)),this, SLOT(recieveSnifferInfoToUi(SnifferData*)));
 }
 
 MainWindow::~MainWindow()
@@ -95,61 +85,34 @@ void MainWindow::on_pushButton_clicked()
  * unfinished; use threads in the future
  */
 void MainWindow::on_start_clicked()
-{/*
+{
     if (! snifferStatus) {
         snifferStatus = true;
         ui->start->setText(tr("Stop"));
 
-        sniffer->openNetDev(sniffer->currentNetName.toLatin1().data());
-        changeFile("default.pcap");
+        /* save to tmpfile,not set*/
+        QDateTime nowTime=QDateTime::currentDateTime();
+        QString tmpFileName=QDir::tempPath()+"/SimpleSniffer~"+nowTime.toString("yyyy-MM-dd~hh-mm-ss")+".tmp";
 
-        for(int i=0; i<10; i++) {
-            sniffer->captureOnce(); //test
-            sniffer->saveCaptureData();
-        }
+        LOG("WRONG2");
+
+        pCaptureThread=new CaptureThread(sniffer,tmpFileName);
+
+
+        LOG("pre connect");
+        connect(pCaptureThread,SIGNAL(sendSnifferInfoToUi(SnifferData*)),this, SLOT(recieveSnifferInfoToUi(SnifferData*)));
+        LOG("connected");
+
+
+        //pCaptureThread->setCondition();
+        pCaptureThread->start();
     }
     else {
         snifferStatus = false;
         ui->start->setText(tr("Start"));
-    }*/
-    //captureThread = new CaptureThread(sniffer, filename, ui);
-    //captureThread->run();
+        pCaptureThread->stop();
+    }
 
-    /*if (pCaptureThread!=NULL) {
-
-        //disconnect(pCaptureThread,SIGNAL(CaptureThread::sendSnifferInfoToUi(SnifferData*)),this, SLOT(recieveSnifferInfoToUi(SnifferData*)));
-        LOG("wrong");
-        //delete pCaptureThread;
-    }*/
-
-    LOG("wrong1");
-
-    //delete pCaptureThread;
-
-    /* save to tmpfile,not set*/
-    QDateTime nowTime=QDateTime::currentDateTime();
-    QString tmpFileName=QDir::tempPath()+"/SimpleSniffer~"+nowTime.toString("yyyy-MM-dd~hh-mm-ss")+".tmp";
-
-    LOG("WRONG2");
-
-    pCaptureThread=new CaptureThread(sniffer,tmpFileName);
-
-
-    LOG("pre connect");
-    connect(pCaptureThread,SIGNAL(sendSnifferInfoToUi(SnifferData*)),this, SLOT(recieveSnifferInfoToUi(SnifferData*)));
-    LOG("connected");
-
-
-    //pCaptureThread->setCondition();
-    pCaptureThread->start();
-    ui->start->setEnabled(false);
-    ui->stop->setEnabled(true);
-
-
-    /*pCaptureThread->sniffer->openNetDev(pCaptureThread->sniffer->currentNetName.toLatin1().data());  //open net device
-    pCaptureThread->sniffer->openDumpFile("-");
-    pCaptureThread->sniffer->captureOnce(); //test
-    */
 }
 
 /*
@@ -266,18 +229,13 @@ void MainWindow::showInfoInListView()
     //pass
 }
 
-void MainWindow::on_stop_clicked()
-{
-    ui->start->setEnabled(true);//pass
-    ui->stop->setEnabled(false);
-    LOG("prestop");
-    pCaptureThread->stop();
-    LOG("stop");
-}
+
 
 void MainWindow::recieveSnifferInfoToUi(SnifferData * snifferDataFromThread)
 {
-
+    if (snifferDataFromThread == NULL) {
+        return;
+    }
     char tmpTableRow[6];
     sprintf(tmpTableRow,"%d",tableRow+1);
 
@@ -294,3 +252,6 @@ void MainWindow::recieveSnifferInfoToUi(SnifferData * snifferDataFromThread)
 
 }
 
+void MainWindow::on_stop_clicked() {
+
+}
