@@ -14,6 +14,7 @@
 #include <QModelIndex>
 #include <QString>
 #include <QStandardItem>
+#include <QByteArray>
 #include "type.h"
 #include <vector>
 

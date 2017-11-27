@@ -121,8 +121,8 @@ void CaptureThread::run()
         int flag=0;
 
         unsigned short sport,dport;
-        unsigned short arp_hard_type,arp_protocol_type;
-        unsigned char  arp_hard_length,arp_protocol_length;           //maybe used later
+        //unsigned short arp_hard_type,arp_protocol_type;
+        //unsigned char  arp_hard_length,arp_protocol_length;           //maybe used later
         unsigned int ip_lenth,ip_total_lenth,arp_lenth,arp_total_lenth;
         unsigned char *pByte;
 

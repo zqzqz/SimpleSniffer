@@ -30,6 +30,7 @@ void MultiView::reload()
     treeModel->setColumnCount(1);
     treeModel->setHeaderData(0, Qt::Horizontal, QObject::tr("Captured Data: "));
     treeView->setModel(treeModel);
+    textBrowser->clear();
 }
 
 /*
@@ -93,5 +94,29 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
  */
 void MultiView::setHexViewByIndex(SnifferData snifferData)
 {
+    QByteArray rawData = snifferData.strData;
+    bool ok; int cnt = 0;
+    QString data = rawData;
+    QString byte;
+    QString ascii = QObject::tr("");
+    QString line = QObject::tr("");
+    for (int i=17; i<data.length(); i = i+2) {
+        cnt += 1;
+        byte = QObject::tr("");
+        byte.append(data[i]);
+        byte.append(data[i+1]);
+        int asc = byte.toInt(&ok, 16);
+        ascii.append((asc>32 && asc<127) ? char(asc) : '.');
+        line.append(byte);
+        line.append(" ");
+        if (cnt%8 == 0) {
+            line.append("  ");
+            line.append(ascii);
+            line.append("\n");
+            textBrowser->insertPlainText(line);
+            line = QObject::tr("");
+            ascii = QObject::tr("");
+        }
+    }
 
 }
