@@ -32,8 +32,8 @@ SOURCES += \
     src/sniffer.cpp \
     src/networkchoice.cpp \
     src/capturethread.cpp \
-    src/packet.cpp \
-    src/filter.cpp
+    src/filter.cpp \
+    src/listview.cpp
 
 HEADERS += \
         src/mainwindow.h \
@@ -43,8 +43,9 @@ HEADERS += \
     src/type.h \
     src/networkchoice.h \
     src/capturethread.h \
-    src/packet.h \
-    src/filter.h
+    src/filter.h \
+    src/listview.h \
+    src/multiview.h
 
 FORMS += \
         ui/mainwindow.ui \

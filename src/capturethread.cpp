@@ -12,11 +12,12 @@ CaptureThread::CaptureThread()
 
 }
 
-CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename)
+CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename, MultiView *view)
 {
     bstop = false;
     sniffer = psniffer;
     filename = tmpfilename;
+    this->view = view;
 }
 
 void CaptureThread::setCondition()
@@ -311,13 +312,11 @@ void CaptureThread::run()
         sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
         if(flag) {
-            emit sendSnifferInfoToUi(&tmpSnifferData);
+            view->addPacketItem(tmpSnifferData.strNum, tmpSnifferData.strTime,
+                                                tmpSnifferData.strSIP, tmpSnifferData.strDIP,
+                                                tmpSnifferData.strProto, tmpSnifferData.strLength);
         }
-        LOG("emit");
 
-        LOG((string)tmpSnifferData.strSIP.toStdString());
-        LOG((string)tmpSnifferData.strDIP.toStdString());
-        LOG((string)tmpSnifferData.strProto.toStdString());
         /*
          * above analyze udp and ip
          * push the results to sniffer->snifferdata;

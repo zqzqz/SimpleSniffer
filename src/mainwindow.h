@@ -3,14 +3,17 @@
 
 #include <QMainWindow>
 #include "sniffer.h"
-#include "networkchoice.h"
 #include <unistd.h>
 #include "capturethread.h"
-#include "ui_mainwindow.h"
 #include "QtWidgets/QMessageBox"
 #include "QtWidgets/QFileDialog"
+#include "multiview.h"
 #include "filter.h"
-#include <QtGui>
+#include "ui_mainwindow.h"
+#include "networkchoice.h"
+#include "log.h"
+#include <unistd.h>
+#include "capturethread.h"
 
 namespace Ui {
     class MainWindow;
@@ -47,9 +50,6 @@ private slots:
     void on_filter_returnPressed();
     void showInfoInListView();
 
-public slots:
-    void recieveSnifferInfoToUi(SnifferData*);
-
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
@@ -63,8 +63,7 @@ private:
     bool openFile(QString openFileName);
     bool changeFile(QString newFileName);
     CaptureThread *pCaptureThread;
-    QStandardItemModel *modelForTableView;
-    int tableRow;
+    MultiView *view;
 };
 
 #endif // MAINWINDOW_H

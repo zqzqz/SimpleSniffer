@@ -1,27 +1,17 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "csniffer.h"
-#include "networkchoice.h"
-#include "log.h"
-#include <unistd.h>
-#include <iostream>
-#include <QtGui>
-#include "capturethread.h"
-
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    tableRow=0;
     sniffer = new Sniffer();
     currentFile = "default.pcap";
     netDevDialog = new NetworkChoice(sniffer, this);
     snifferStatus = false;
     filter = new Filter();
-
+    view = new MultiView(ui->treeWidget, ui->textBrowser, ui->tableView);
+    //view= new ListView(ui->tableView);
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(quit()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(open()));
@@ -33,34 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     }
 
-    //set tableview
-
-    modelForTableView = new QStandardItemModel();
-    modelForTableView->setHorizontalHeaderItem(0,new QStandardItem(QObject::tr("NO.")));
-    modelForTableView->setHorizontalHeaderItem(1,new QStandardItem(QObject::tr("Source IP")));
-    modelForTableView->setHorizontalHeaderItem(2,new QStandardItem(QObject::tr("Destination IP")));
-    modelForTableView->setHorizontalHeaderItem(3,new QStandardItem(QObject::tr("Source MAC")));
-    modelForTableView->setHorizontalHeaderItem(4,new QStandardItem(QObject::tr("Destination MAC")));
-    modelForTableView->setHorizontalHeaderItem(5,new QStandardItem(QObject::tr("Protocol")));
-    modelForTableView->setHorizontalHeaderItem(6,new QStandardItem(QObject::tr("INFO")));
-
-    ui->tableView->setModel(modelForTableView);
-    ui->tableView->setColumnWidth(0,90);
-    ui->tableView->setColumnWidth(1,150);
-    ui->tableView->setColumnWidth(2,150);
-    ui->tableView->setColumnWidth(3,150);
-    ui->tableView->setColumnWidth(4,150);
-    ui->tableView->setColumnWidth(5,90);
-    ui->tableView->setColumnWidth(6,150);
-
-    ui->tableView->horizontalHeader()->resizeSections(QHeaderView::ResizeMode::Fixed);
-    ui->tableView->verticalHeader()->hide();
-    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->tableView->setTextElideMode(Qt::ElideMiddle);
-    ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableView->setFixedWidth(90*2+150*5);
-
 }
 
 MainWindow::~MainWindow()
@@ -70,15 +32,6 @@ MainWindow::~MainWindow()
     delete filter;
 }
 
-/*
- * bug
- * I think we can delete on_pushButton_clicked
-
-void MainWindow::on_pushButton_clicked()
-{   
-    //pass
-}
-*/
 
 /*
  * start capturing packets
@@ -96,13 +49,7 @@ void MainWindow::on_start_clicked()
 
         LOG("WRONG2");
 
-        pCaptureThread=new CaptureThread(sniffer,tmpFileName);
-
-
-        LOG("pre connect");
-        connect(pCaptureThread,SIGNAL(sendSnifferInfoToUi(SnifferData*)),this, SLOT(recieveSnifferInfoToUi(SnifferData*)));
-        LOG("connected");
-
+        pCaptureThread=new CaptureThread(sniffer, tmpFileName, view);
 
         //pCaptureThread->setCondition();
         pCaptureThread->start();
@@ -229,28 +176,6 @@ void MainWindow::showInfoInListView()
     //pass
 }
 
-
-
-void MainWindow::recieveSnifferInfoToUi(SnifferData * snifferDataFromThread)
-{
-    if (snifferDataFromThread == NULL) {
-        return;
-    }
-    char tmpTableRow[6];
-    sprintf(tmpTableRow,"%d",tableRow+1);
-
-    modelForTableView->setItem(tableRow,0,new QStandardItem(tmpTableRow));
-    modelForTableView->setItem(tableRow,1,new QStandardItem(snifferDataFromThread->strSIP));
-    modelForTableView->setItem(tableRow,2,new QStandardItem(snifferDataFromThread->strDIP));
-    modelForTableView->setItem(tableRow,3,new QStandardItem(snifferDataFromThread->protoInfo.strSMac));
-    modelForTableView->setItem(tableRow,4,new QStandardItem(snifferDataFromThread->protoInfo.strDMac));
-    modelForTableView->setItem(tableRow,5,new QStandardItem(snifferDataFromThread->strProto));
-    modelForTableView->setItem(tableRow,6,new QStandardItem("NONE"));
-    //ui->tableView->setModel(modelForTableView);
-    tableRow++;
-    LOG((string)snifferDataFromThread->strProto.toStdString());
-
-}
 
 void MainWindow::on_stop_clicked() {
 
