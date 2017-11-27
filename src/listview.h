@@ -1,3 +1,9 @@
+/*
+ * listview.h
+ * Deal with QTableView on  mainwindow:
+ *   collect snifferData from captureThread
+ *   add Items into TableView
+ */
 #ifndef LISTVIEW_H
 #define LISTVIEW_H
 
@@ -8,6 +14,8 @@
 #include <QModelIndex>
 #include <QString>
 #include <QStandardItem>
+#include "type.h"
+#include <vector>
 
 
 class ListView
@@ -21,14 +29,15 @@ public:
     void rebuildInfo();
     bool isChanged();
 
-    void addPacketItem(QString strNum, QString strTime, QString strSIP,
-                                QString strDIP, QString strProto, QString strLength);
+    void addPacketItem(SnifferData &data);
 
     void getOrderNumber(QModelIndex &index, QString &strNumber);
 
-private:
+    void clearData();
+protected:
     QStandardItemModel *mainModel;
     int index;
+    std::vector<SnifferData> packets;
 };
 
 

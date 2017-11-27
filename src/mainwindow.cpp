@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     netDevDialog = new NetworkChoice(sniffer, this);
     snifferStatus = false;
     filter = new Filter();
-    view = new MultiView(ui->treeWidget, ui->textBrowser, ui->tableView);
+    view = new MultiView(ui->treeView, ui->textBrowser, ui->tableView);
     //view= new ListView(ui->tableView);
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(quit()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
@@ -18,9 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionOurTeam, SIGNAL(triggered()), this, SLOT(about()));
     // choose network when app executing by default
     if(netDevDialog->exec() == QDialog::Accepted) {
-
         ui->netLabel->setText(sniffer->currentNetName);
-
     }
 
 }
@@ -179,4 +177,9 @@ void MainWindow::showInfoInListView()
 
 void MainWindow::on_stop_clicked() {
 
+}
+
+void MainWindow::on_tableView_clicked(const QModelIndex &index)
+{
+    view->packetInfoByIndex(index);
 }

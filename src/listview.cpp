@@ -32,7 +32,13 @@ ListView::ListView(QTableView *v)
 
 ListView::~ListView()
 {
+    clearData();
+}
 
+void ListView::clearData()
+{
+    mainModel->clear();
+    packets.clear();
 }
 
 void ListView::rebuildInfo()
@@ -40,32 +46,43 @@ void ListView::rebuildInfo()
 
 }
 
-void ListView::addPacketItem(QString strNum, QString strTime, QString strSIP,
-                                        QString strDIP, QString strProto, QString strLength)
+/*
+ * called by CaptureThread::run
+ * add a new packet
+ */
+void ListView::addPacketItem(SnifferData &tmpSnifferData)
 {
     QStandardItem *item;
 
-    item = new QStandardItem(QString(strNum));
+    item = new QStandardItem(QString(tmpSnifferData.strNum));
     mainModel->setItem(index, 0, item);
-    item = new QStandardItem(QString(strTime));
+    item = new QStandardItem(QString(tmpSnifferData.strTime));
     mainModel->setItem(index, 1, item);
-    item = new QStandardItem(QString(strSIP));
+    item = new QStandardItem(QString(tmpSnifferData.strSIP));
     mainModel->setItem(index, 2, item);
-    item = new QStandardItem(QString(strDIP));
+    item = new QStandardItem(QString(tmpSnifferData.strDIP));
     mainModel->setItem(index, 3, item);
-    item = new QStandardItem(QString(strProto));
+    item = new QStandardItem(QString(tmpSnifferData.strProto));
     mainModel->setItem(index, 4, item);
-    item = new QStandardItem(QString(strLength));
+    item = new QStandardItem(QString(tmpSnifferData.strLength));
     mainModel->setItem(index, 5, item);
+    packets.push_back(tmpSnifferData);
 
     index++;
 }
 
+/*
+ * forget to use :)
+ */
 void ListView::getOrderNumber(QModelIndex &index, QString &strNumber)
 {
     strNumber = mainModel->data(index, 0).toString();
 }
 
+/*
+ * unused
+ *
+ */
 bool ListView::isChanged()
 {
     // Qt::MatchWildcard 使用基于字符串的通配符  Qt::MatchRecursive 搜索整个目录结构

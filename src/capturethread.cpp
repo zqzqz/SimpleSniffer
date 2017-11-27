@@ -312,9 +312,7 @@ void CaptureThread::run()
         sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
         if(flag) {
-            view->addPacketItem(tmpSnifferData.strNum, tmpSnifferData.strTime,
-                                                tmpSnifferData.strSIP, tmpSnifferData.strDIP,
-                                                tmpSnifferData.strProto, tmpSnifferData.strLength);
+            view->addPacketItem(tmpSnifferData);
         }
 
         /*

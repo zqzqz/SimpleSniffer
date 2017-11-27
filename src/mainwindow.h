@@ -50,6 +50,8 @@ private slots:
     void on_filter_returnPressed();
     void showInfoInListView();
 
+    void on_tableView_clicked(const QModelIndex &index);
+
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
