@@ -104,6 +104,21 @@ typedef struct _icmp_header
     
 }icmp_header;
 
+//igmp
+typedef struct _igmp_header
+{
+    unsigned char  type;
+    unsigned char  maxRespCode;
+    unsigned short crc;
+    unsigned int   groupAddress;
+    unsigned short resvSQrvQQIC;//4+1+3+8
+    unsigned short numberOfSrc;
+    unsigned char   recordType;
+    unsigned char   auxDataLen;
+    unsigned short  numberOfGroupSrc;
+    unsigned char    multicastAddress[4];
+}igmp_header;
+
 // 定义一些应用层协议使用的端口号
 
 // TCP 协议
@@ -154,6 +169,7 @@ struct AnalyseProtoType
 
     QString 	strAppProto;		// 应用层
     QByteArray  strSendInfo;
+    QString     strBasicInfo;
 
     void init()
     {
@@ -167,14 +183,15 @@ struct AnalyseProtoType
         strHeadLength = "协议头长度：";
         strLength     = "总长：";
         strNextProto  = "高层协议类型：";
-        strSIP        = "来源IP地址：";
-        strDIP        = "目标IP地址：";
+        strSIP        = "";
+        strDIP        = "";
 
         strTranProto  = "传输层 - ";
-        strSPort      = "来源端口号：";
-        strDPort      = "目标端口号：";
+        strSPort      = "";
+        strDPort      = "";
 
         strAppProto   = "应用层 - ";
+        strBasicInfo  = "";
     }
 };
 

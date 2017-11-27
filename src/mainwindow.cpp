@@ -159,7 +159,12 @@ void MainWindow::recieveSnifferInfoToUi(SnifferData * snifferDataFromThread)
     modelForTableView->setItem(tableRow,3,new QStandardItem(snifferDataFromThread->protoInfo.strSMac));
     modelForTableView->setItem(tableRow,4,new QStandardItem(snifferDataFromThread->protoInfo.strDMac));
     modelForTableView->setItem(tableRow,5,new QStandardItem(snifferDataFromThread->strProto));
-    modelForTableView->setItem(tableRow,6,new QStandardItem("NONE"));
+    if(snifferDataFromThread->protoInfo.strBasicInfo=="") {
+        modelForTableView->setItem(tableRow,6,new QStandardItem("NONE"));
+    } else {
+        modelForTableView->setItem(tableRow,6,new QStandardItem(snifferDataFromThread->protoInfo.strBasicInfo));
+    }
+
     //ui->tableView->setModel(modelForTableView);
     tableRow++;
     LOG((string)snifferDataFromThread->strProto.toStdString());
