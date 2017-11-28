@@ -33,7 +33,8 @@ SOURCES += \
     src/networkchoice.cpp \
     src/capturethread.cpp \
     src/filter.cpp \
-    src/listview.cpp
+    src/listview.cpp \
+    src/multiview.cpp
 
 HEADERS += \
         src/mainwindow.h \

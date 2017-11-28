@@ -165,8 +165,9 @@ void MainWindow::on_filter_textChanged(const QString &command)
 
 void MainWindow::on_filter_returnPressed()
 {
-    filter->filtrate(ui->filter->text(), ui->tableView);
+    filter->loadCommand(ui->filter->text());
     filter->printQuery();
+    filter->launchFilter(view);
 }
 
 void MainWindow::showInfoInListView()

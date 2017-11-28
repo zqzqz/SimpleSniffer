@@ -2,8 +2,48 @@
 
 ListView::ListView(QTableView *v)
 {
-    index = 0;
     view = v;
+    mainModel = new QStandardItemModel();
+    mainModel->setHorizontalHeaderItem(0,new QStandardItem(QObject::tr("NO.")));
+    mainModel->setHorizontalHeaderItem(1,new QStandardItem(QObject::tr("Time")));
+    mainModel->setHorizontalHeaderItem(2,new QStandardItem(QObject::tr("Source IP")));
+    mainModel->setHorizontalHeaderItem(3,new QStandardItem(QObject::tr("Destination IP")));
+    mainModel->setHorizontalHeaderItem(4,new QStandardItem(QObject::tr("Protocol")));
+    mainModel->setHorizontalHeaderItem(5,new QStandardItem(QObject::tr("Size")));
+
+
+    view->setModel(mainModel);
+    view->setColumnWidth(0,90);
+    view->setColumnWidth(1,150);
+    view->setColumnWidth(2,200);
+    view->setColumnWidth(3,200);
+    view->setColumnWidth(4,200);
+    view->setColumnWidth(5,90);
+
+    view->horizontalHeader()->resizeSections(QHeaderView::ResizeMode::Fixed);
+    view->verticalHeader()->hide();
+    view->setSelectionBehavior(QAbstractItemView::SelectRows);
+    view->setSelectionMode(QAbstractItemView::SingleSelection);
+    view->setTextElideMode(Qt::ElideMiddle);
+    view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    index = 0;
+}
+
+ListView::~ListView()
+{
+    clearData();
+}
+
+void ListView::clearData()
+{
+    mainModel->clear();
+    packets.clear();
+}
+
+void ListView::rebuildInfo()
+{
+    mainModel->clear();
     //set tableview
     mainModel = new QStandardItemModel();
     mainModel->setHorizontalHeaderItem(0,new QStandardItem(QObject::tr("NO.")));
@@ -28,29 +68,15 @@ ListView::ListView(QTableView *v)
     view->setSelectionMode(QAbstractItemView::SingleSelection);
     view->setTextElideMode(Qt::ElideMiddle);
     view->setEditTriggers(QAbstractItemView::NoEditTriggers);
-}
 
-ListView::~ListView()
-{
-    clearData();
-}
-
-void ListView::clearData()
-{
-    mainModel->clear();
-    packets.clear();
-}
-
-void ListView::rebuildInfo()
-{
-
+    index = 0;
 }
 
 /*
  * called by CaptureThread::run
  * add a new packet
  */
-void ListView::addPacketItem(SnifferData &tmpSnifferData)
+void ListView::addPacketItem(SnifferData &tmpSnifferData, bool fnew)
 {
     QStandardItem *item;
 
@@ -66,7 +92,7 @@ void ListView::addPacketItem(SnifferData &tmpSnifferData)
     mainModel->setItem(index, 4, item);
     item = new QStandardItem(QString(tmpSnifferData.strLength));
     mainModel->setItem(index, 5, item);
-    packets.push_back(tmpSnifferData);
+    if(fnew) packets.push_back(tmpSnifferData);
 
     index++;
 }

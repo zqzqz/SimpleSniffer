@@ -30,12 +30,13 @@ public:
     void rebuildInfo();
     bool isChanged();
 
-    void addPacketItem(SnifferData &data);
+    void addPacketItem(SnifferData &data, bool fnew=true);
 
     void getOrderNumber(QModelIndex &index, QString &strNumber);
 
     void clearData();
 protected:
+    friend class Filter;
     QStandardItemModel *mainModel;
     int index;
     std::vector<SnifferData> packets;
