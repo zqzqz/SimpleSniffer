@@ -9,12 +9,23 @@
 ## Comments
 Unfinished
 
+## Code Structure
+* NetworkChoice(Dialog) -- Sniffer
+* MainWindow
+  * CaptureThread
+    * Sniffer
+      * <inherit> CSniffer
+  * Filter
+  * MultiView
+    * <inherit> ListView
+      * Packets 
+
 ## Current tasks
 * analyse packets upon different protocols
   * implement code in capturethread.cpp: run
-  * show brief packets' info in List View
-  * show detail in a tree structure
-  * show hex raw data in Text View
+  * show brief packets' info in List View (finished)
+  * show detail in a tree structure (untested)
+  * show hex raw data in Text View (untested)
 * file operation
   * choose a file to save captured data (untested)
   * load a file with packets' data  (untested)
