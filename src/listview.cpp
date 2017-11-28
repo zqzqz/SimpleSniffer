@@ -35,12 +35,21 @@ ListView::~ListView()
     clearData();
 }
 
+/*
+ * clear all data to init status
+ *
+ */
 void ListView::clearData()
 {
-    mainModel->clear();
     packets.clear();
+    index = 0;
+    rebuildInfo();
 }
 
+/*
+ * delete all items in tableView
+ * vector<snifferdata> packets not changed
+ */
 void ListView::rebuildInfo()
 {
     mainModel->clear();

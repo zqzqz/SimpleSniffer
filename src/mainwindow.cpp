@@ -47,6 +47,7 @@ void MainWindow::on_start_clicked()
 {
     if (! snifferStatus) {
         snifferStatus = true;
+        view->clearData();
         //ui->start->setText(tr("Stop"));
         ui->start->setIcon(QIcon(":/resource/button/stop.png"));
         ui->start->setToolTip(tr("Stop (Ctrl+S)"));
