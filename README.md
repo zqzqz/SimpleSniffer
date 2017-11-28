@@ -7,17 +7,17 @@
 * OS: linux
 
 ## Comments
-Unfinished
+Please do not push sniffer.pro.user anymore. Conflicts will happen.
 
 ## Code Structure
 * NetworkChoice(Dialog) -- Sniffer
 * MainWindow
   * CaptureThread
     * Sniffer
-      * <inherit> CSniffer
+      * (inherit) CSniffer
   * Filter
   * MultiView
-    * <inherit> ListView
+    * (inherit) ListView
       * Packets 
 
 ## Current tasks
