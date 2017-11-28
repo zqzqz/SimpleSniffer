@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Choose Net</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="1">
@@ -26,13 +26,27 @@
    </item>
    <item row="1" column="0">
     <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string>Choose a network to sniffer</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
      </property>
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QTextBrowser" name="IPinfoView"/>
+    <widget class="QTextBrowser" name="IPinfoView">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+    </widget>
    </item>
    <item row="2" column="0">
     <widget class="QComboBox" name="choiceBox"/>

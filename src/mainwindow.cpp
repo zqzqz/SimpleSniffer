@@ -16,6 +16,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(open()));
     connect(ui->actionOurTeam, SIGNAL(triggered()), this, SLOT(about()));
+
+    //button settings
+    ui->start->setIcon(QIcon(":/resource/button/start.png"));
+    ui->start->setToolTip(tr("Start (Ctrl+S)"));
+
+    //mainwindow appearance settings
+    //setWindowTitle(tr("Sniffer - 1.0.0 Beta"));
+
     // choose network when app executing by default
     if(netDevDialog->exec() == QDialog::Accepted) {
         ui->netLabel->setText(sniffer->currentNetName);
@@ -39,7 +47,9 @@ void MainWindow::on_start_clicked()
 {
     if (! snifferStatus) {
         snifferStatus = true;
-        ui->start->setText(tr("Stop"));
+        //ui->start->setText(tr("Stop"));
+        ui->start->setIcon(QIcon(":/resource/button/stop.png"));
+        ui->start->setToolTip(tr("Stop (Ctrl+S)"));
 
         /* save to tmpfile,not set*/
         QDateTime nowTime=QDateTime::currentDateTime();
@@ -54,7 +64,8 @@ void MainWindow::on_start_clicked()
     }
     else {
         snifferStatus = false;
-        ui->start->setText(tr("Start"));
+        ui->start->setIcon(QIcon(":/resource/button/start.png"));
+        ui->start->setToolTip(tr("Start (Ctrl+S)"));
         pCaptureThread->stop();
     }
 

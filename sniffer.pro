@@ -51,3 +51,6 @@ HEADERS += \
 FORMS += \
         ui/mainwindow.ui \
     ui/networkchoice.ui
+
+RESOURCES += sniffer.qrc \
+    sniffer.qrc

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Sniffer - 1.0.0 Beta</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -21,8 +21,27 @@
        <layout class="QGridLayout" name="gridLayout">
         <item row="2" column="0">
          <widget class="QPushButton" name="start">
+          <property name="toolTip">
+           <string extracomment="Start (Ctrl+S)"/>
+          </property>
           <property name="text">
-           <string>Start</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>../resource/button/start.png</normaloff>../resource/button/start.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+S</string>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -62,7 +81,13 @@
        <widget class="QTreeView" name="treeView"/>
       </item>
       <item row="3" column="1">
-       <widget class="QTextBrowser" name="textBrowser"/>
+       <widget class="QTextBrowser" name="textBrowser">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
