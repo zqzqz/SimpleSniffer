@@ -15,8 +15,8 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="0">
-     <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0" columnstretch="3,2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0,0,0" columnstretch="2,1">
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="2" column="0">
@@ -64,7 +64,7 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0" colspan="2">
+      <item row="3" column="0" colspan="2">
        <widget class="QTableView" name="tableView">
         <property name="lineWidth">
          <number>1</number>
@@ -77,10 +77,14 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QTreeView" name="treeView"/>
+      <item row="5" column="0">
+       <widget class="QTreeView" name="treeView">
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+       </widget>
       </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <widget class="QTextBrowser" name="textBrowser">
         <property name="font">
          <font>
@@ -174,6 +178,11 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionSaveTree">
+   <property name="text">
+    <string>Save Packet Info</string>
    </property>
   </action>
  </widget>

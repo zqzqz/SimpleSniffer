@@ -40,7 +40,6 @@ void NetworkChoice::showCurrentNetInfo(const QString &netDevName) {
             ui->IPinfoView->insertPlainText(i->strNetDevDescribe.data());
         }
     }
-    LOG("i love you");
 }
 
 /*

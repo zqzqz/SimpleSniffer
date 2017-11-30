@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(open()));
     connect(ui->actionOurTeam, SIGNAL(triggered()), this, SLOT(about()));
+    connect(ui->actionSaveTree, SIGNAL(triggered()), this, SLOT(saveTree()));
 
     //button settings
     ui->start->setIcon(QIcon(":/resource/button/start.png"));
@@ -47,6 +48,7 @@ void MainWindow::on_start_clicked()
 {
     if (! snifferStatus) {
         snifferStatus = true;
+        view->clearData();
         //ui->start->setText(tr("Stop"));
         ui->start->setIcon(QIcon(":/resource/button/stop.png"));
         ui->start->setToolTip(tr("Stop (Ctrl+S)"));
@@ -205,11 +207,49 @@ void MainWindow::showInfoInListView()
 
 
 void MainWindow::on_stop_clicked() {
+<<<<<<< HEAD
 >>>>>>> refs/remotes/origin/master
 
+=======
+    //pass
+>>>>>>> origin/master
 }
 
 void MainWindow::on_tableView_clicked(const QModelIndex &index)
 {
     view->packetInfoByIndex(index);
+}
+
+/*
+ * right mouse clicked event
+ * on TreeView: save current packet info to file
+ */
+void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu *popMenu =new QMenu(this);
+
+    popMenu->addAction(ui->actionSaveTree);
+    popMenu->exec(QCursor::pos());
+
+}
+
+void MainWindow::saveTree()
+{
+    LOG("right mouse clicked in TreeView");
+    QString saveFileName = QFileDialog::getSaveFileName(this, tr("Save Packet Info ... "), ".", tr("text file (*.txt)"));
+    if (!saveFileName.isEmpty()) {
+        QFile file(saveFileName);
+        if(file.open(QIODevice::WriteOnly | QIODevice::Text)) //write text to file
+        {
+            QTextStream out(&file);
+            QList<QStandardItem*> list = view->returnTreeItems();
+
+            foreach (QStandardItem* item, list) {
+                out << item->text();
+                out << "\n";
+            }
+
+            file.close();
+        }
+    }
 }

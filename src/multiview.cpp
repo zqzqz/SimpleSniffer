@@ -120,3 +120,9 @@ void MultiView::setHexViewByIndex(SnifferData snifferData)
     }
 
 }
+
+
+QList<QStandardItem*> MultiView::returnTreeItems()
+{
+    return treeModel->findItems(QObject::tr("*"), Qt::MatchWildcard | Qt::MatchRecursive);
+}

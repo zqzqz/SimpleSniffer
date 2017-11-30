@@ -13,6 +13,7 @@
 #include "networkchoice.h"
 #include "log.h"
 #include <unistd.h>
+#include <QTreeWidgetItem>
 #include "capturethread.h"
 
 namespace Ui {
@@ -45,12 +46,16 @@ private slots:
 
     void about();
 
+    void saveTree();
+
     void on_filter_textChanged(const QString &arg1);
 
     void on_filter_returnPressed();
     void showInfoInListView();
 
     void on_tableView_clicked(const QModelIndex &index);
+
+    void on_treeView_customContextMenuRequested(const QPoint &pos);
 
 private:
     Ui::MainWindow *ui;
