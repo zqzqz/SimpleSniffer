@@ -13,7 +13,7 @@ MultiView::~MultiView()
 void MultiView::packetInfoByIndex(QModelIndex index)
 {
     reload();
-    int i = mainModel->data(mainModel->index(index.row(), 0)).toInt();
+    int i = mainModel->data(mainModel->index(index.row(), 0)).toInt();//??
 
     SnifferData snifferData = packets.at(i-1);
     setHexViewByIndex(snifferData);

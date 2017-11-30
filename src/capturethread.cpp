@@ -71,7 +71,7 @@ void CaptureThread::run()
     sniffer->snifferData.clear();  //snifferdata is a vector
 
     while (bstop!=true &&(res=sniffer->captureOnce())>=0) {
-        msleep(1);
+        //msleep(1);
         SnifferData tmpSnifferData;
         // out of time,wait for packet
         if(res==0) {
@@ -95,9 +95,9 @@ void CaptureThread::run()
 
         tmpSnifferData.strData="raw capture data:" +rawByteData.toHex().toUpper();
 
-        sprintf(sizeNum,"%d",num);
+        /*sprintf(sizeNum,"%d",num);
         tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet
-        num++;
+        num++;*/
 
         local_tv_sec=sniffer->header->ts.tv_sec;  //seconds since 1900
         ltime=localtime(&local_tv_sec); //get local time
@@ -547,6 +547,9 @@ void CaptureThread::run()
 
         if(flag==1&&bstop==false) {
             view->addPacketItem(tmpSnifferData);
+            sprintf(sizeNum,"%d",num);
+            tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet
+            num++;
 
         }
 
