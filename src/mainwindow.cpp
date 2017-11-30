@@ -176,23 +176,8 @@ void MainWindow::on_filter_textChanged(const QString &command)
     ui->filter->setPalette(palette);
 }
 
-<<<<<<< HEAD
-    modelForTableView->setItem(tableRow,0,new QStandardItem(tmpTableRow));
-    modelForTableView->setItem(tableRow,1,new QStandardItem(snifferDataFromThread->strSIP));
-    modelForTableView->setItem(tableRow,2,new QStandardItem(snifferDataFromThread->strDIP));
-    modelForTableView->setItem(tableRow,3,new QStandardItem(snifferDataFromThread->protoInfo.strSMac));
-    modelForTableView->setItem(tableRow,4,new QStandardItem(snifferDataFromThread->protoInfo.strDMac));
-    modelForTableView->setItem(tableRow,5,new QStandardItem(snifferDataFromThread->strProto));
-    if(snifferDataFromThread->protoInfo.strBasicInfo=="") {
-        modelForTableView->setItem(tableRow,6,new QStandardItem("NONE"));
-    } else {
-        modelForTableView->setItem(tableRow,6,new QStandardItem(snifferDataFromThread->protoInfo.strBasicInfo));
-    }
 
-    //ui->tableView->setModel(modelForTableView);
-    tableRow++;
-    LOG((string)snifferDataFromThread->strProto.toStdString());
-=======
+
 void MainWindow::on_filter_returnPressed()
 {
     filter->loadCommand(ui->filter->text());
@@ -207,12 +192,7 @@ void MainWindow::showInfoInListView()
 
 
 void MainWindow::on_stop_clicked() {
-<<<<<<< HEAD
->>>>>>> refs/remotes/origin/master
 
-=======
-    //pass
->>>>>>> origin/master
 }
 
 void MainWindow::on_tableView_clicked(const QModelIndex &index)
