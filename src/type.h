@@ -1,6 +1,6 @@
 #ifndef TYPE_H_
 #define TYPE_H_
-
+#include <string>
 // Mac头部（14字节）
 typedef struct _eth_header
 {

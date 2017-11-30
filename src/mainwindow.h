@@ -2,15 +2,23 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "../src/sniffer.h"
-#include "networkchoice.h"
+#include "sniffer.h"
 #include <unistd.h>
 #include "capturethread.h"
-#include <QtGui>
+#include "QtWidgets/QMessageBox"
+#include "QtWidgets/QFileDialog"
+#include "multiview.h"
+#include "filter.h"
+#include "ui_mainwindow.h"
+#include "networkchoice.h"
+#include "log.h"
+#include <unistd.h>
+#include "capturethread.h"
 
 namespace Ui {
     class MainWindow;
 }
+class Filter;
 
 class MainWindow : public QMainWindow
 {
@@ -29,18 +37,35 @@ private slots:
 
     void on_chooseNetButton_clicked();
 
+    void quit();
+
+    void save();
+
+    void open();
+
+    void about();
+
+    void on_filter_textChanged(const QString &arg1);
+
+    void on_filter_returnPressed();
     void showInfoInListView();
 
-public slots:
-    void recieveSnifferInfoToUi(SnifferData*);
+    void on_tableView_clicked(const QModelIndex &index);
 
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
+    QString currentFile;
     NetworkChoice *netDevDialog;
+    CaptureThread *captureThread;
+    Filter *filter;
+    bool snifferStatus; //true for running; false for stopped;
+
+    bool saveFile(QString saveFileName);
+    bool openFile(QString openFileName);
+    bool changeFile(QString newFileName);
     CaptureThread *pCaptureThread;
-    QStandardItemModel *modelForTableView;
-    int tableRow;
+    MultiView *view;
 };
 
 #endif // MAINWINDOW_H

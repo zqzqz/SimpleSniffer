@@ -4,11 +4,20 @@
 #include<stdio.h>
 #include"log.h"
 
-CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename)
+namespace Ui {
+    class MainWindow;
+}
+CaptureThread::CaptureThread()
+{
+
+}
+
+CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename, MultiView *view)
 {
     bstop = false;
     sniffer = psniffer;
     filename = tmpfilename;
+    this->view = view;
 }
 
 void CaptureThread::setCondition()
@@ -115,8 +124,8 @@ void CaptureThread::run()
         int flag=0;
 
         unsigned short sport,dport;
-        unsigned short arp_hard_type,arp_protocol_type;
-        unsigned char  arp_hard_length,arp_protocol_length;           //maybe used later
+        //unsigned short arp_hard_type,arp_protocol_type;
+        //unsigned char  arp_hard_length,arp_protocol_length;           //maybe used later
         unsigned int ip_lenth,ip_total_lenth,arp_lenth,arp_total_lenth;
         unsigned char *pByte;
         unsigned int tcpSeqNo,tcpAckNo;
@@ -382,14 +391,15 @@ void CaptureThread::run()
 
         sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
+<<<<<<< HEAD
         if(flag==1&&bstop==false) {
             emit sendSnifferInfoToUi(&tmpSnifferData);
+=======
+        if(flag) {
+            view->addPacketItem(tmpSnifferData);
+>>>>>>> refs/remotes/origin/master
         }
-        LOG("emit");
 
-        LOG((string)tmpSnifferData.strSIP.toStdString());
-        LOG((string)tmpSnifferData.strDIP.toStdString());
-        LOG((string)tmpSnifferData.strProto.toStdString());
         /*
          * above analyze udp and ip
          * push the results to sniffer->snifferdata;
@@ -398,9 +408,5 @@ void CaptureThread::run()
 
 
     }
-
-
-      //core function of capturing packets
-      //add recursive code here.
 }
 

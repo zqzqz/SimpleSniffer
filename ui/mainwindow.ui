@@ -11,30 +11,37 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Sniffer - 1.0.0 Beta</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="1" column="0">
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="2" column="1">
-       <widget class="QTextBrowser" name="textBrowser"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QTreeWidget" name="treeWidget">
-        <column>
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </column>
-       </widget>
-      </item>
+     <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0" columnstretch="3,2">
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout">
         <item row="2" column="0">
          <widget class="QPushButton" name="start">
+          <property name="toolTip">
+           <string extracomment="Start (Ctrl+S)"/>
+          </property>
           <property name="text">
-           <string>Start</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>../resource/button/start.png</normaloff>../resource/button/start.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+S</string>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -47,13 +54,6 @@
         </item>
         <item row="2" column="2">
          <widget class="QLineEdit" name="filter"/>
-        </item>
-        <item row="2" column="1">
-         <widget class="QPushButton" name="stop">
-          <property name="text">
-           <string>Stop</string>
-          </property>
-         </widget>
         </item>
         <item row="1" column="1" colspan="2">
          <widget class="QLabel" name="netLabel">
@@ -77,6 +77,18 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0">
+       <widget class="QTreeView" name="treeView"/>
+      </item>
+      <item row="3" column="1">
+       <widget class="QTextBrowser" name="textBrowser">
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -87,25 +99,26 @@
      <x>0</x>
      <y>0</y>
      <width>996</width>
-     <height>28</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSniffer">
     <property name="title">
-     <string>start</string>
+     <string>File</string>
     </property>
-    <addaction name="actionback"/>
-    <addaction name="actionquit"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuabout">
     <property name="title">
-     <string>about</string>
+     <string>About</string>
     </property>
-    <addaction name="actionOur_team"/>
+    <addaction name="actionOurTeam"/>
    </widget>
    <widget class="QMenu" name="menuhelp">
     <property name="title">
-     <string>help</string>
+     <string>Help</string>
     </property>
     <addaction name="actionDocument"/>
     <addaction name="actionQuick_start"/>
@@ -133,17 +146,17 @@
     <string>stop</string>
    </property>
   </action>
-  <action name="actionback">
+  <action name="actionSave">
    <property name="text">
-    <string>back</string>
+    <string>Save</string>
    </property>
   </action>
-  <action name="actionquit">
+  <action name="actionOpen">
    <property name="text">
-    <string>quit</string>
+    <string>Open</string>
    </property>
   </action>
-  <action name="actionOur_team">
+  <action name="actionOurTeam">
    <property name="text">
     <string>Our team</string>
    </property>
@@ -156,6 +169,11 @@
   <action name="actionQuick_start">
    <property name="text">
     <string>Quick start</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>
