@@ -37,17 +37,17 @@ bool Filter::loadCommand(QString command)
     }
     std::string com = command.toStdString();
     std::size_t pos;
-    pos = com.find("-p");
+    pos = com.find("-p ");
     if (pos<com.size()) query.insert(make_pair(P, findWord(com, pos+2)));
-    pos = com.find("-s");
+    pos = com.find("-s ");
     if (pos<com.size()) query.insert(make_pair(S, findWord(com, pos+2)));
-    pos = com.find("-d");
+    pos = com.find("-d ");
     if (pos<com.size()) query.insert(make_pair(D, findWord(com, pos+2)));
-    pos = com.find("-sport");
-    if (pos<com.size()) query.insert(make_pair(SPORT, findWord(com, pos+5)));
-    pos = com.find("-dport");
-    if (pos<com.size()) query.insert(make_pair(DPORT, findWord(com, pos+5)));
-    pos = com.find("-c");
+    pos = com.find("-sport ");
+    if (pos<com.size()) query.insert(make_pair(SPORT, findWord(com, pos+6)));
+    pos = com.find("-dport ");
+    if (pos<com.size()) query.insert(make_pair(DPORT, findWord(com, pos+6)));
+    pos = com.find("-c ");
     if (pos<com.size()) query.insert(make_pair(C, findWord(com, pos+2)));
     return true;
 }
@@ -103,8 +103,10 @@ void Filter::launchFilter(MultiView *view)
             }
             case(DPORT):{
                 std::string tmpDPort = iSnifferData->strDIP.toStdString();
-                tmpDPort = tmpDPort.substr(tmpDPort.find_first_of(':'));
+                tmpDPort = tmpDPort.substr(tmpDPort.find_first_of(':')+1);
+                LOG(tmpDPort.data());
                 if(iQuery->second.find(tmpDPort.data()) != 0) {
+                    LOG("fail");
                     flag = false;
                 }
                 break;

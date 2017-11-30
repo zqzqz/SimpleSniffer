@@ -1,5 +1,6 @@
 #include "multiview.h"
 #include <iostream>
+#include "log.h"
 
 MultiView::~MultiView()
 {
@@ -108,7 +109,6 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
     index = treeModel->item(2)->index();
     treeView->setExpanded(index, true);
 
-
     if((snifferData.strProto.toStdString()).substr(0,3)=="TCP") {
         snifferData.protoInfo.strSPort="源端口: "+snifferData.protoInfo.strSPort;
         snifferData.protoInfo.strDPort="目的端口: "+snifferData.protoInfo.strDPort;
@@ -162,6 +162,9 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
     treeModel->setItem(3, item);
     index = treeModel->item(3)->index();
     treeView->setExpanded(index, true);
+    itemChild = new QStandardItem(snifferData.protoInfo.strBasicInfo);
+    item->appendRow(itemChild);
+
 }
 
 /*

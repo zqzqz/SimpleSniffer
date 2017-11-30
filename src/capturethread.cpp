@@ -242,7 +242,7 @@ void CaptureThread::run()
 
 
                 if(sport==FTP_PORT||dport==FTP_PORT) {
-                    tmpSnifferData.strProto="FTP";
+                    tmpSnifferData.strProto+="(FTP)";
                     tmpSnifferData.protoInfo.strAppProto+="FTP(File Transfer Protocol)";
                 }/*else if(sport==TELNET_PORT||dport==TELNET_PORT){
                     tmpSnifferData.strProto+="(TELNET)";
@@ -251,17 +251,17 @@ void CaptureThread::run()
                     tmpSnifferData.strProto="TELNET";
                     tmpSnifferData.protoInfo.strAppProto+="TELNET";
                 }*/ else if (sport ==SMTP_PORT||dport==SMTP_PORT) {
-                    tmpSnifferData.strProto="SMTP";
+                    tmpSnifferData.strProto+="(SMTP)";
                     tmpSnifferData.protoInfo.strAppProto+="SMTP(Simple Message Transfer Protocol)";
                 } else if(sport==POP3_PORT||dport==POP3_PORT) {
-                    tmpSnifferData.strProto="POP3";
+                    tmpSnifferData.strProto+="(POP3)";
                     tmpSnifferData.protoInfo.strAppProto+="POP3 (Post Office Protocol 3)";
                 } else if (sport == HTTPS_PORT || dport == HTTPS_PORT) {
-                    tmpSnifferData.strProto = "HTTPS";
+                    tmpSnifferData.strProto += "(HTTPS)";
                     tmpSnifferData.protoInfo.strAppProto += "HTTPS (Hypertext Transfer Protocol over Secure Socket Layer)";
                 } else if (sport == HTTP_PORT || dport == HTTP_PORT ||
                          sport == HTTP2_PORT || dport == HTTP2_PORT) {
-                    tmpSnifferData.strProto = "HTTP";
+                    tmpSnifferData.strProto += "(HTTP)";
                     tmpSnifferData.protoInfo.strAppProto += "HTTP (Hyper Text Transport Protocol)";
                     tmpSnifferData.protoInfo.strSendInfo = rawByteData.remove(0, 54);
                 } else {
@@ -298,10 +298,10 @@ void CaptureThread::run()
                 tmpSnifferData.protoInfo.strDPort+=sizeUdpDstPort;
 
                 if (sport == DNS_PORT || dport == DNS_PORT) {
-                    tmpSnifferData.strProto = "DNS";
+                    tmpSnifferData.strProto += "(DNS)";
                     tmpSnifferData.protoInfo.strAppProto += "DNS (Domain Name Server)";
                 } else if (sport == SNMP_PORT || dport == SNMP_PORT) {
-                    tmpSnifferData.strProto = "SNMP";
+                    tmpSnifferData.strProto += "(SNMP)";
                     tmpSnifferData.protoInfo.strAppProto += "SNMP (Simple Network Management Protocol)";
                 } else {
                     tmpSnifferData.protoInfo.strAppProto += "Unknown Proto";
@@ -542,13 +542,14 @@ void CaptureThread::run()
             LOG("unknown proto");
         }
 
-        sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
+        //sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
 
         if(flag==1&&bstop==false) {
-            view->addPacketItem(tmpSnifferData);
+
             sprintf(sizeNum,"%d",num);
             tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet
+            view->addPacketItem(tmpSnifferData);
             num++;
 
         }
