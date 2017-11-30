@@ -41,12 +41,14 @@ void CaptureThread::run()
     int res;//save the result of catth packet
 
     QByteArray      rawByteData;
-    int             num=1;
+    int             num;
+    num=1;
     char            sizeNum[10];
     char            sizeLength[6];
     time_t          local_tv_sec;
     struct          tm* ltime;   //tm defined in time.h
     char            timestr[16];
+    //int             whetherFragment=0;
 
     //open net device
 
@@ -121,7 +123,8 @@ void CaptureThread::run()
         _icmp_header  *icmph;
         _igmp_header  *igmph;
 
-        int flag=0;
+        int flag;
+        flag=0;
 
         unsigned short sport,dport;
         //unsigned short arp_hard_type,arp_protocol_type;
@@ -190,9 +193,12 @@ void CaptureThread::run()
             sprintf(sizeDstAddr,"%d.%d.%d.%d",iph->daddr[0],iph->daddr[1],iph->daddr[2],iph->daddr[3]);
 
             unsigned short ipTypeOfService=iph->tos;
-            unsigned short ipFlag=(iph->flags_fo & 0xF000)/8192;
-            unsigned short ipOffset=(iph->flags_fo & 0x1FFF);
-            unsigned short ipTimeToLive=iph->ttl;
+            unsigned short ipFlag;
+            ipFlag=(iph->flags_fo & 0xF000)/8192;
+            unsigned short ipOffset;
+            ipOffset=(iph->flags_fo & 0x1FFF);
+            unsigned short ipTimeToLive;
+            ipTimeToLive=iph->ttl;
             char sizeIpTypeOfService[6],sizeIpIdentification[6],sizeIpFlag[6],sizeIpOffset[6],sizeIPTimeToLive[6],sizeIpHeadCrc[6];
             //sprintf(sizeIpTypeOfService,"%u",ipTypeOfService);
             sprintf(sizeIpIdentification,"%u",iph->identification);
@@ -201,7 +207,7 @@ void CaptureThread::run()
             sprintf(sizeIPTimeToLive,"%u",ipTimeToLive);
             sprintf(sizeIpHeadCrc,"%u",iph->crc);
 
-            switch (ipTypeOfService) {
+            switch ((ipTypeOfService/32)) {
             case 0:
                 tmpSnifferData.protoInfo.strIpServiceField+="Routine";
                 break;
@@ -229,17 +235,83 @@ void CaptureThread::run()
             default:
                 break;
             }
-            if(ipFlag==2) {
-                tmpSnifferData.protoInfo.strIpFlag+=" 0x02 (Don't Fragment)";
-            } else if (ipFlag==1) {
-                tmpSnifferData.protoInfo.strIpFlag+=" 0x01 (More Fragment)";
+            if((ipTypeOfService/16) % 2 ==1) {
+                tmpSnifferData.protoInfo.strIpServiceField+=" Low Delay";
             } else {
-                //pass
+                tmpSnifferData.protoInfo.strIpServiceField+=" Normal Delay";
+            }
+            if((ipTypeOfService/8) % 2 ==1) {
+                tmpSnifferData.protoInfo.strIpServiceField+=" High Throughput";
+            } else {
+                tmpSnifferData.protoInfo.strIpServiceField+=" Normal Throughput";
+            }
+            if((ipTypeOfService/4) % 2 ==1) {
+                tmpSnifferData.protoInfo.strIpServiceField+=" High Reliability";
+            } else {
+                tmpSnifferData.protoInfo.strIpServiceField+=" Low Reliability";
+            }
+            if((ipTypeOfService/2) % 2 ==1) {
+                tmpSnifferData.protoInfo.strIpServiceField+=" High Expense";
+            } else {
+                tmpSnifferData.protoInfo.strIpServiceField+=" Low Expense";
+            }
+
+
+
+
+            if((ipFlag/2)==1) {
+                tmpSnifferData.protoInfo.strIpFlag+=" Don't Fragment";
+            } else {
+                tmpSnifferData.protoInfo.strIpFlag+=" May Fragment";
+            }
+
+            if ((ipFlag % 2)==1) {
+              tmpSnifferData.protoInfo.strIpFlag+=" More Fragment";
+            } else {
+              tmpSnifferData.protoInfo.strIpFlag+=" Last Fragment";
             }
             tmpSnifferData.protoInfo.strIpIdentification+=sizeIpIdentification;
             tmpSnifferData.protoInfo.strIpOffset+=sizeIpOffset;
             tmpSnifferData.protoInfo.strIpTimeTOLive+=sizeIPTimeToLive;
             tmpSnifferData.protoInfo.strIpHeadCrc+=sizeIpHeadCrc;
+
+  /***********************then ip options*********************************/
+            if(ip_lenth>20) {    //which means that it has options
+                unsigned short ipOptionData;
+                ipOptionData=iph->optionData;
+                switch (ipOptionData) {
+                case 0:
+                    tmpSnifferData.protoInfo.strIpOptions+="选项表结束";
+                    break;
+                case 1:
+                    tmpSnifferData.protoInfo.strIpOptions+="无操作";
+                    break;
+                case 130:
+                    tmpSnifferData.protoInfo.strIpOptions+="安全选项";
+                    break;
+                case 131:
+                    tmpSnifferData.protoInfo.strIpOptions+="松散源路由选择和记录路由";
+                    break;
+                case 137:
+                    tmpSnifferData.protoInfo.strIpOptions+="严格源路由选择和记录路由";
+                    break;
+                case 7:
+                    tmpSnifferData.protoInfo.strIpOptions+="记录路由";
+                    break;
+                case 136:
+                    tmpSnifferData.protoInfo.strIpOptions+="流标记";
+                    break;
+                case 68:
+                    tmpSnifferData.protoInfo.strIpOptions+="时间戳";
+                    break;
+                default:
+                    break;
+                }
+
+            } else {
+                tmpSnifferData.protoInfo.strIpOptions+=" 无选项";
+            }
+/****************************option end******************************************/
 
             //above:finished processing ip header
 
@@ -317,9 +389,42 @@ void CaptureThread::run()
                 if((tcpFlag % 64)>=32) {
                     tmpSnifferData.protoInfo.strTcpFlag+=" URG";
                 }
+/**************************************tcp options begin*****************************************/
+                if(tcpHeadLength>20) {     //which means tcp has options
+                    unsigned short tcpOptionData=tcph->tcpOptionData;
+                    switch (tcpOptionData) {
+                    case 0:
+                        tmpSnifferData.protoInfo.strTcpOptions+=" 选项表结束";
+                        break;
+                    case 1:
+                        tmpSnifferData.protoInfo.strTcpOptions+=" 无操作";
+                        break;
+                    case 2:
+                        tmpSnifferData.protoInfo.strTcpOptions+=" 最大报文段长度";
+                        break;
+                    case 3:
+                        tmpSnifferData.protoInfo.strTcpOptions+=" 窗口扩大因子";
+                        break;
+                    case 4:
+                        tmpSnifferData.protoInfo.strTcpOptions+=" SACK允许选项";
+                        break;
+                    case 5:
+                        tmpSnifferData.protoInfo.strTcpOptions+=" SACK选项";
+                        break;
+                    case 8:
+                        tmpSnifferData.protoInfo.strTcpOptions+=" 时间戳选项";
+                        break;
+                    default:
+                        break;
+                    }
+                } else {
+                    tmpSnifferData.protoInfo.strTcpOptions+=" 无选项";
+                }
 
 
+/*************************************tcp options end*******************************************/
 
+/**************************************tcp high protocol begin**********************************/
                 if(sport==FTP_PORT||dport==FTP_PORT) {
                     tmpSnifferData.strProto="FTP";
                     tmpSnifferData.protoInfo.strAppProto+="FTP(File Transfer Protocol)";
@@ -488,7 +593,8 @@ void CaptureThread::run()
                 tmpSnifferData.protoInfo.strSIP+=sizeSrcAddr;
                 tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
 
-                unsigned short igmpMaxRespCode=igmph->maxRespCode;
+                unsigned short igmpMaxRespCode;
+                igmpMaxRespCode=igmph->maxRespCode;
                 char sizeIgmpCrc[6],sizeIgmpMaxRespCode[6];
 
                 sprintf(sizeIgmpCrc,"%u",ntohs(igmph->crc));

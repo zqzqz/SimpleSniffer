@@ -68,6 +68,7 @@ typedef struct _ip_header
     unsigned short		crc;			// 首部校验和(Header checksum)
     unsigned char		saddr[4];		// 源地址(Source address)
     unsigned char		daddr[4];		// 目标地址(Destination address)
+    unsigned char        optionData;
 }ip_header;
 
 // TCP头部（20字节）
@@ -84,6 +85,7 @@ typedef struct _tcp_header
     unsigned short	wnd_size;			// 16位窗口大小
     unsigned short	chk_sum;			// 16位TCP检验和
     unsigned short	urgt_p;				// 16为紧急指针
+    unsigned char  tcpOptionData;
 }tcp_header;
 
 // UDP头部（8字节）
