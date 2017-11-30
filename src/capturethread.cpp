@@ -364,10 +364,10 @@ void CaptureThread::run()
                 }
 
                 pByte=(unsigned char *)iph+ip_lenth+sizeof(_icmp_header);
-                if(icmpType==4||htons(icmph->type)icmpType==12) {
+                if(icmpType==4||icmpType==12) {
                     //tmpSnifferData.strProto="ICMP(error messages)";
                     tmpSnifferData.protoInfo.strBasicInfo="errro message";
-                } else if(icmpType==9||htons(icmph->type)icmpType==10||(icmpType>=13 &&icmpType<=18)) {
+                } else if(icmpType==9||icmpType==10||(icmpType>=13 &&icmpType<=18)) {
                     //tmpSnifferData.strProto="ICMP(operational information indicating)";
                     tmpSnifferData.protoInfo.strBasicInfo="operational information indicating";
                 } else if(icmpType==8) {
@@ -376,7 +376,7 @@ void CaptureThread::run()
                 } else if(icmpType==0) {
                     tmpSnifferData.protoInfo.strBasicInfo="Echo (ping) reply:";
 
-                } else if(icmpType==3)) {
+                } else if(icmpType==3) {
                     tmpSnifferData.protoInfo.strBasicInfo="Unreachable Destination";
                 } else if(icmpType==5) {
                     tmpSnifferData.protoInfo.strBasicInfo="Redirect";
