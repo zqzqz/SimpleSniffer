@@ -29,6 +29,7 @@ public:
     }
     ~MultiView();
     void packetInfoByIndex(QModelIndex index);   //call to update treeView $ hexView; responding signal list_item_clicked
+    QList<QStandardItem*> returnTreeItems();
 };
 
 #endif // MULTIVIEW_H
