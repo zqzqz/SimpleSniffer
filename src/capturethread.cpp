@@ -164,10 +164,22 @@ void CaptureThread::run()
             tmpSnifferData.protoInfo.strNetTitle+="Internet Prtocol";
 
 
+<<<<<<< HEAD
             iph=(_ip_header*)(sniffer->pktData+14);//based on bytes
+=======
+
+
+            iph=(_ip_header*)(sniffer->pktData+14);
+>>>>>>> yzydev
 
             //get length of ip header
             ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
+
+            char sizeVer[6];
+            unsigned short shortIphVer=(iph->ver_ihl & 0xF0);
+            shortIphVer=shortIphVer/16;
+            sprintf(sizeVer,"%u",shortIphVer);
+            tmpSnifferData.protoInfo.strVersion+=sizeVer;
 
             char sizeSize[6];
             sprintf(sizeSize,"%u",ip_lenth);
@@ -189,20 +201,59 @@ void CaptureThread::run()
             switch(iph->proto) {
             case TCP_SIG:
                 tmpSnifferData.strProto="TCP";
+                tmpSnifferData.strProtoForShow="Transmission Control Protocol";
                 tmpSnifferData.protoInfo.strNextProto+= "TCP (Transmission Control Protocol)";
                 tmpSnifferData.protoInfo.strTranProto+= "TCP protocol (Transmission Control Protocol)";
                 tcph=(_tcp_header *)((unsigned char *)iph+ip_lenth);
+<<<<<<< HEAD
                 tcpSeqNo=ntohs(tcph->seq_no);
                 tcpAckNo=ntohs(tcph->ack_no);
                 sport=ntohs(tcph->sport); //
                 dport=ntohs(tcph->dport); //
+=======
+
+                tcpSeqNo=ntohs(tcph->seq_no);
+                tcpAckNo=ntohs(tcph->ack_no); //check later
+
+                sport=ntohs(tcph->sport);
+                dport=ntohs(tcph->dport);
+>>>>>>> yzydev
                 char sizeTcpSeqNO[12],sizeTcpAckNo[12];
                 sprintf(sizeTcpSeqNO,"%u",tcpSeqNo);
                 sprintf(sizeTcpAckNo,"%u",tcpAckNo);
                 tmpSnifferData.protoInfo.strBasicInfo="Seq=";
                 tmpSnifferData.protoInfo.strBasicInfo+=sizeTcpSeqNO;
+<<<<<<< HEAD
                 tmpSnifferData.protoInfo.strBasicInfo+=",Ack=";
                 tmpSnifferData.protoInfo.strBasicInfo+=sizeTcpAckNo;
+=======
+                                tmpSnifferData.protoInfo.strBasicInfo+=",Ack=";
+                tmpSnifferData.protoInfo.strBasicInfo+=sizeTcpAckNo;
+                tmpSnifferData.protoInfo.strSeqNo+=sizeTcpSeqNO;
+                tmpSnifferData.protoInfo.strAckNo+=sizeTcpAckNo;
+
+                char sizeChkSum[6],sizeWindowSize[6];
+                sprintf(sizeChkSum,"%u",tcph->chk_sum);
+                sprintf(sizeWindowSize,"%u",tcph->wnd_size);
+
+                tmpSnifferData.protoInfo.strChkSum+=sizeChkSum;
+                tmpSnifferData.protoInfo.strWindowSize+=sizeWindowSize;
+
+                char sizeTcpSrcPort[6],sizeTcpDstPort[6];
+                sprintf(sizeTcpSrcPort,"%d",sport);
+                sprintf(sizeTcpDstPort,"%d",dport);
+
+                tmpSnifferData.strSIP=sizeSrcAddr;
+                tmpSnifferData.strSIP=tmpSnifferData.strSIP+":"+sizeTcpSrcPort;
+                tmpSnifferData.strDIP=sizeDstAddr;
+                tmpSnifferData.strDIP=tmpSnifferData.strDIP+":"+sizeTcpDstPort;
+
+                tmpSnifferData.protoInfo.strSIP+=sizeSrcAddr;
+                tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
+                tmpSnifferData.protoInfo.strSPort+=sizeTcpSrcPort;
+                tmpSnifferData.protoInfo.strDPort+=sizeTcpDstPort;
+
+>>>>>>> yzydev
 
                 if(sport==FTP_PORT||dport==FTP_PORT) {
                     tmpSnifferData.strProto="FTP";
@@ -233,12 +284,32 @@ void CaptureThread::run()
                 break;
             case UDP_SIG:
                 tmpSnifferData.strProto="UDP";
+                tmpSnifferData.strProtoForShow="User Datagram Protocol";
                 tmpSnifferData.protoInfo.strNextProto+="UDP(User Datagram Protocol)";
                 tmpSnifferData.protoInfo.strTranProto+="UDP(User Datagram Protocol)";
                 udph=(_udp_header*)((unsigned char *)iph+ip_lenth);
                 sport=ntohs(udph->sport);
                 dport=ntohs(udph->dport);
                 pByte=(unsigned char *)iph+ip_lenth+sizeof(_udp_header);
+                char sizeUdpLenth[6],sizeUdpCrc[6];
+                sprintf(sizeUdpLenth,"%u",udph->len);
+                tmpSnifferData.protoInfo.strUdpLenth+=sizeUdpLenth;
+                sprintf(sizeUdpCrc,"%u",udph->crc);
+                tmpSnifferData.protoInfo.strChkSum+=sizeUdpCrc;
+
+                char sizeUdpSrcPort[6],sizeUdpDstPort[6];
+                sprintf(sizeUdpSrcPort,"%d",sport);
+                sprintf(sizeUdpDstPort,"%d",dport);
+
+                tmpSnifferData.strSIP=sizeSrcAddr;
+                tmpSnifferData.strSIP=tmpSnifferData.strSIP+":"+sizeUdpSrcPort;
+                tmpSnifferData.strDIP=sizeDstAddr;
+                tmpSnifferData.strDIP=tmpSnifferData.strDIP+":"+sizeUdpDstPort;
+
+                tmpSnifferData.protoInfo.strSIP+=sizeSrcAddr;
+                tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
+                tmpSnifferData.protoInfo.strSPort+=sizeUdpSrcPort;
+                tmpSnifferData.protoInfo.strDPort+=sizeUdpDstPort;
 
                 if (sport == DNS_PORT || dport == DNS_PORT) {
                     tmpSnifferData.strProto = "DNS";
@@ -252,10 +323,73 @@ void CaptureThread::run()
                 break;
             case ICMP_SIG:
                 tmpSnifferData.strProto="ICMP";
+                tmpSnifferData.strProtoForShow="Internet Control Message Protocol";
                 tmpSnifferData.protoInfo.strNextProto+="ICMP(Internet Control Message Protocol)";
                 tmpSnifferData.protoInfo.strNextProto+="ICMP(Internet Control Message Protocol)";
                 icmph=(_icmp_header*)((unsigned char*)iph+ip_lenth);
+
+                char sizeIcmpType[3],sizeIcmpCode[3],sizeIcmpCrc[6];
+                unsigned short icmpType,icmpCode;
+                icmpType=icmph->type;
+                icmpCode=icmph->code;
+                sprintf(sizeIcmpType,"%u",icmpType);
+                sprintf(sizeIcmpCode,"%u",icmpCode);
+                sprintf(sizeIcmpCrc,"%u",ntohs(icmph->crc));
+                tmpSnifferData.protoInfo.strIcmpType+=sizeIcmpType;
+                tmpSnifferData.protoInfo.strIcmpCode+=sizeIcmpCode;
+                tmpSnifferData.protoInfo.strChkSum+=sizeIcmpCrc;
+
+                tmpSnifferData.strSIP=sizeSrcAddr;
+                tmpSnifferData.strDIP=sizeDstAddr;
+                tmpSnifferData.protoInfo.strSIP+=sizeSrcAddr;
+                tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
+
+                switch (icmpType) {
+                case 8:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Echo (ping) request)";
+                    break;
+                case 0:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Echo (ping) reply)";
+                    break;
+                case 3:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Destination Unreachable)";
+                    break;
+                case 4:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Source Quench)";
+                    break;
+                case 5:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Redirect(Change route))";
+                    break;
+                case 11:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Time Exceeded)";
+                    break;
+                case 12:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Parameter Problem)";
+                    break;
+                case 13:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Timestamp Request)";
+                    break;
+                case 14:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Timestamp Reply)";
+                    break;
+                case 15:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Information Request)";
+                    break;
+                case 16:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Information Reply)";
+                    break;
+                case 17:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Address Mask Request)";
+                    break;
+                case 18:
+                    tmpSnifferData.protoInfo.strIcmpType+="(Address Mask Reply)";
+                    break;
+                default:
+                    break;
+                }
+
                 pByte=(unsigned char *)iph+ip_lenth+sizeof(_icmp_header);
+<<<<<<< HEAD
                 if(htons(icmph->type)==4||htons(icmph->type)==12) {
                     //tmpSnifferData.strProto="ICMP(error messages)";
                     tmpSnifferData.protoInfo.strBasicInfo="errro message";
@@ -276,6 +410,84 @@ void CaptureThread::run()
                     tmpSnifferData.protoInfo.strBasicInfo="Out of time";
                 } else {
                     //tmpSnifferData.protoInfo.strAppProto += "Unknown Proto";
+=======
+                if(icmpType==4||icmpType==12) {
+                    //tmpSnifferData.strProto="ICMP(error messages)";
+                    tmpSnifferData.protoInfo.strBasicInfo="errro message";
+                } else if(icmpType==9||icmpType==10||(icmpType>=13 &&icmpType<=18)) {
+                    //tmpSnifferData.strProto="ICMP(operational information indicating)";
+                    tmpSnifferData.protoInfo.strBasicInfo="operational information indicating";
+                } else if(icmpType==8) {
+                    tmpSnifferData.protoInfo.strBasicInfo="Echo (ping) request:";
+
+                } else if(icmpType==0) {
+                    tmpSnifferData.protoInfo.strBasicInfo="Echo (ping) reply:";
+
+                } else if(icmpType==3) {
+                    tmpSnifferData.protoInfo.strBasicInfo="Unreachable Destination";
+                } else if(icmpType==5) {
+                    tmpSnifferData.protoInfo.strBasicInfo="Redirect";
+                } else if(icmpType==11) {
+                    tmpSnifferData.protoInfo.strBasicInfo="Out of time";
+                } else {
+                    //tmpSnifferData.protoInfo.strAppProto += "Unknown Proto";
+                }
+                break;
+            case IGMP_SIG:
+                tmpSnifferData.strProto="IGMP";
+                tmpSnifferData.strProtoForShow="Internet Group Manager Protocol";
+                tmpSnifferData.protoInfo.strNextProto+="IGMP(Internet Group Manager Protocol)";
+                tmpSnifferData.protoInfo.strTranProto+="IGMP(Internet Group Manager Protocol)";
+                igmph=(_igmp_header *)((unsigned char *)iph+ip_lenth);
+
+                tmpSnifferData.strSIP=sizeSrcAddr;
+                tmpSnifferData.strDIP=sizeDstAddr;
+                tmpSnifferData.protoInfo.strSIP+=sizeSrcAddr;
+                tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
+
+                char sizeIgmpType[3],sizeIgmpCrc[6];
+
+                sprintf(sizeIgmpCrc,"%u",ntohs(igmph->crc));
+
+                tmpSnifferData.protoInfo.strChkSum+=sizeIgmpCrc;
+
+                unsigned short igmpType,igmpRecordType;
+                igmpType=igmph->type;
+                igmpRecordType=igmph->recordType;
+
+                if(igmpType==0x22) {
+                    tmpSnifferData.protoInfo.strIgmpType+="Membership Report (0x22)";
+                } else {
+                    tmpSnifferData.protoInfo.strIgmpType+="Membership Query (0x11)";
+                }
+
+
+                if(igmpType==0x22) {
+                    tmpSnifferData.protoInfo.strBasicInfo="Membership Report:";
+                    if(igmph->numberOfSrc>0) {
+                        char sizeMiltiCastAddr[24];//???
+                        sprintf(sizeMiltiCastAddr,"%d.%d.%d.%d",igmph->multicastAddress[0],igmph->multicastAddress[1],igmph->multicastAddress[2],igmph->multicastAddress[3]);
+                        if(igmpRecordType==4) {
+                            tmpSnifferData.protoInfo.strBasicInfo+="join group";
+                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
+                        } else if(igmpRecordType==3) {
+                            tmpSnifferData.protoInfo.strBasicInfo+="leave group";
+                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
+                        } else if(igmpRecordType==2){
+                            tmpSnifferData.protoInfo.strBasicInfo+="mode is exclude";
+                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
+                        } else if(igmpRecordType==1){
+                            tmpSnifferData.protoInfo.strBasicInfo+="mode is include";
+                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
+                        } else {
+                            //pass
+                        }
+                    }
+                 } else if(igmpType==0x11) {
+                     tmpSnifferData.protoInfo.strBasicInfo="Membership Query:";
+                 } else {
+                     //pass
+>>>>>>> yzydev
                 }
                 break;
             case IGMP_SIG:
@@ -315,6 +527,7 @@ void CaptureThread::run()
                 continue;
             }
 
+<<<<<<< HEAD
             char sizeSrcPort[6],sizeDstPort[6];
             sprintf(sizeSrcPort,"%d",sport);
             sprintf(sizeDstPort,"%d",dport);
@@ -335,6 +548,9 @@ void CaptureThread::run()
        /***************ARP begin*************************************/
 
         else if(htons(eth->eth_type)==0x0806) {
+=======
+        }else if(htons(eth->eth_type)==2054) {
+>>>>>>> yzydev
 
             LOG("it is arp packet")
 
@@ -355,6 +571,35 @@ void CaptureThread::run()
             sprintf(arpSizeSize,"%u",arp_total_lenth);
             tmpSnifferData.protoInfo.strLength+=arpSizeSize;
             tmpSnifferData.protoInfo.strLength+="bytes";
+
+            tmpSnifferData.protoInfo.strArpHard+="Ethernet(1)";
+            tmpSnifferData.protoInfo.strArpPro+="IPv4 (0x0800)";
+            tmpSnifferData.protoInfo.strArpHardSize+="6";
+            tmpSnifferData.protoInfo.strArpProSize+="4";
+
+            if(htons(arph->arp_op)==0x0001) {
+                tmpSnifferData.protoInfo.strOpCode+="Request (1)";
+            } else {
+                tmpSnifferData.protoInfo.strOpCode+="Reply (2)";
+            }
+
+            QByteArray ArpTMac,ArpSMac;
+            ArpTMac.setRawData((const char *)arph->arp_tha,6);
+            ArpSMac.setRawData((const char *)arph->arp_sha,6);
+            ArpTMac=ArpTMac.toHex().toUpper();
+            ArpSMac=ArpSMac.toHex().toUpper();
+
+            tmpSnifferData.protoInfo.strTargetMac=tmpSnifferData.protoInfo.strTargetMac
+                                             +ArpTMac[0]+ArpTMac[1]+":"+ArpTMac[2]+ArpTMac[3]+":"
+                                             +ArpTMac[4]+ArpTMac[5]+":"+ArpTMac[6]+ArpTMac[7]+":"
+                                             +ArpTMac[8]+ArpTMac[9]+":"+ArpTMac[10]+ArpTMac[11];
+            tmpSnifferData.protoInfo.strSenderMac=tmpSnifferData.protoInfo.strSenderMac
+                    +ArpSMac[0]+ArpSMac[1]+":"+ArpSMac[2]+ArpSMac[3]+":"
+                    +ArpSMac[4]+ArpSMac[5]+":"+ArpSMac[6]+ArpSMac[7]+":"
+                    +ArpSMac[8]+ArpSMac[9]+":"+ArpSMac[10]+ArpSMac[11];
+
+            //tmpSnifferData.protoInfo.strSenderMac+=;
+            //tmpSnifferData.protoInfo.strTargetMac+=;
 
 
             char arpSrcProtocolAddr[24],arpDstProtocolAddr[24];
@@ -391,8 +636,12 @@ void CaptureThread::run()
 
         sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
+<<<<<<< HEAD
 
         if(flag) {
+=======
+        if(flag==1&&bstop==false) {
+>>>>>>> yzydev
             view->addPacketItem(tmpSnifferData);
 
         }

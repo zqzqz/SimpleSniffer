@@ -59,28 +59,104 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
     index = treeModel->item(1)->index();
     treeView->setExpanded(index, true);
 
-    itemChild = new QStandardItem(snifferData.protoInfo.strVersion);
-    item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strHeadLength);
-    item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strLength);
-    item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strNextProto);
-    item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strSIP);
-    item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strDIP);
-    item->appendRow(itemChild);
 
+/************************************network layer*******************************************/
+    if((snifferData.strProto.toStdString())=="ARP") {
+        itemChild = new QStandardItem(snifferData.protoInfo.strArpHard);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strArpPro);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strArpHardSize);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strArpProSize);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strOpCode);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strSenderMac);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strSIP);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strTargetMac);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strDIP);
+        item->appendRow(itemChild);
+        return;
+    } else {
+        itemChild = new QStandardItem(snifferData.protoInfo.strVersion);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strHeadLength);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strLength);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strNextProto);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strSIP);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strDIP);
+        item->appendRow(itemChild);
+
+    }
+
+
+
+
+
+/*******************************************transport layer***********************************************/
+    snifferData.protoInfo.strTranProto+=snifferData.strProtoForShow;
     item = new QStandardItem(snifferData.protoInfo.strTranProto);
     treeModel->setItem(2, item);
     index = treeModel->item(2)->index();
     treeView->setExpanded(index, true);
 
-    itemChild = new QStandardItem(snifferData.protoInfo.strSPort);
-    item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strDPort);
-    item->appendRow(itemChild);
+
+    if((snifferData.strProto.toStdString()).substr(0,3)=="TCP") {
+        snifferData.protoInfo.strSPort="源端口: "+snifferData.protoInfo.strSPort;
+        snifferData.protoInfo.strDPort="目的端口: "+snifferData.protoInfo.strDPort;
+        itemChild = new QStandardItem(snifferData.protoInfo.strSPort);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strDPort);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strSeqNo);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strAckNo);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strWindowSize);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
+        item->appendRow(itemChild);
+    } else if((snifferData.strProto.toStdString()).substr(0,3)=="UDP") {
+        snifferData.protoInfo.strSPort="源端口: "+snifferData.protoInfo.strSPort;
+        snifferData.protoInfo.strDPort="目的端口: "+snifferData.protoInfo.strDPort;
+        itemChild = new QStandardItem(snifferData.protoInfo.strSPort);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strDPort);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strUdpLenth);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
+        item->appendRow(itemChild);
+
+    } else if((snifferData.strProto.toStdString())=="ICMP") {
+        itemChild = new QStandardItem(snifferData.protoInfo.strIcmpType);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIcmpCode);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
+        item->appendRow(itemChild);
+        return;
+
+    } else if((snifferData.strProto.toStdString())=="IGMP") {
+        itemChild = new QStandardItem(snifferData.protoInfo.strIgmpType);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
+        item->appendRow(itemChild);
+        return;
+    } else {
+        return; //pass
+    }
+
+
+/***********************************application layer****************************************************/
 
     item = new QStandardItem(snifferData.protoInfo.strAppProto);
     treeModel->setItem(3, item);
