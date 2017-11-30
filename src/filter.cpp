@@ -13,13 +13,13 @@ Filter::~Filter()
 /*
  * usage of commands
  * [-options] [data] ...
- * -p protocol / -s sourceIP / -d destinationIP / -sport sourcePort / -dport destinationPort
+ * -p protocol / -s sourceIP / -d destinationIP / -sport sourcePort / -dport destinationPort / -c packetContent
  * using regex to check syntax.
  */
 bool Filter::checkCommand(QString command)
 {
     //LOG(command.toLatin1().data());
-    std::string pattern{ "([ ]*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+))[ ]+)*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+))?" };
+    std::string pattern{ "([ ]*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-C[ ]\\w+))[ ]+)*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-C[ ]\\w+))?" };
     std::regex re(pattern);
     return std::regex_match(command.toStdString(), re);
 }
@@ -47,6 +47,8 @@ bool Filter::loadCommand(QString command)
     if (pos<com.size()) query.insert(make_pair(SPORT, findWord(com, pos+5)));
     pos = com.find("-dport");
     if (pos<com.size()) query.insert(make_pair(DPORT, findWord(com, pos+5)));
+    pos = com.find("-c");
+    if (pos<com.size()) query.insert(make_pair(C, findWord(com, pos+2)));
     return true;
 }
 
@@ -106,6 +108,9 @@ void Filter::launchFilter(MultiView *view)
                     flag = false;
                 }
                 break;
+            }
+            case(C):{
+
             }
             }
             if (!flag) break;
