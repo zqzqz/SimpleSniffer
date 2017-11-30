@@ -84,9 +84,9 @@ void CaptureThread::run()
 
         sniffer->saveCaptureData();   //write raw info to the file named filename
 
-        if(sniffer->snifferData.size()>=10) {
+        /*if(sniffer->snifferData.size()>=10) {
             sniffer->snifferData.clear();
-        }
+        }*/
 
         tmpSnifferData.protoInfo.init();
 
@@ -153,7 +153,7 @@ void CaptureThread::run()
         //Second get ip header
 
        /***************IP begin****************************************/
-       if(htons(eth->eth_type)==0x0800) {     //there is somthing wrong about this sentence
+       if(htons(eth->eth_type)==2048) {     //there is somthing wrong about this sentence
 
             LOG("it is IP packet");
 
@@ -164,13 +164,10 @@ void CaptureThread::run()
             tmpSnifferData.protoInfo.strNetTitle+="Internet Prtocol";
 
 
-<<<<<<< HEAD
-            iph=(_ip_header*)(sniffer->pktData+14);//based on bytes
-=======
 
 
             iph=(_ip_header*)(sniffer->pktData+14);
->>>>>>> yzydev
+
 
             //get length of ip header
             ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
@@ -205,29 +202,19 @@ void CaptureThread::run()
                 tmpSnifferData.protoInfo.strNextProto+= "TCP (Transmission Control Protocol)";
                 tmpSnifferData.protoInfo.strTranProto+= "TCP protocol (Transmission Control Protocol)";
                 tcph=(_tcp_header *)((unsigned char *)iph+ip_lenth);
-<<<<<<< HEAD
-                tcpSeqNo=ntohs(tcph->seq_no);
-                tcpAckNo=ntohs(tcph->ack_no);
-                sport=ntohs(tcph->sport); //
-                dport=ntohs(tcph->dport); //
-=======
+
 
                 tcpSeqNo=ntohs(tcph->seq_no);
                 tcpAckNo=ntohs(tcph->ack_no); //check later
 
                 sport=ntohs(tcph->sport);
                 dport=ntohs(tcph->dport);
->>>>>>> yzydev
                 char sizeTcpSeqNO[12],sizeTcpAckNo[12];
                 sprintf(sizeTcpSeqNO,"%u",tcpSeqNo);
                 sprintf(sizeTcpAckNo,"%u",tcpAckNo);
                 tmpSnifferData.protoInfo.strBasicInfo="Seq=";
                 tmpSnifferData.protoInfo.strBasicInfo+=sizeTcpSeqNO;
-<<<<<<< HEAD
                 tmpSnifferData.protoInfo.strBasicInfo+=",Ack=";
-                tmpSnifferData.protoInfo.strBasicInfo+=sizeTcpAckNo;
-=======
-                                tmpSnifferData.protoInfo.strBasicInfo+=",Ack=";
                 tmpSnifferData.protoInfo.strBasicInfo+=sizeTcpAckNo;
                 tmpSnifferData.protoInfo.strSeqNo+=sizeTcpSeqNO;
                 tmpSnifferData.protoInfo.strAckNo+=sizeTcpAckNo;
@@ -253,7 +240,6 @@ void CaptureThread::run()
                 tmpSnifferData.protoInfo.strSPort+=sizeTcpSrcPort;
                 tmpSnifferData.protoInfo.strDPort+=sizeTcpDstPort;
 
->>>>>>> yzydev
 
                 if(sport==FTP_PORT||dport==FTP_PORT) {
                     tmpSnifferData.strProto="FTP";
@@ -389,28 +375,6 @@ void CaptureThread::run()
                 }
 
                 pByte=(unsigned char *)iph+ip_lenth+sizeof(_icmp_header);
-<<<<<<< HEAD
-                if(htons(icmph->type)==4||htons(icmph->type)==12) {
-                    //tmpSnifferData.strProto="ICMP(error messages)";
-                    tmpSnifferData.protoInfo.strBasicInfo="errro message";
-                } else if(htons(icmph->type)==9||htons(icmph->type)==10||(htons(icmph->type)>=13 &&htons(icmph->type)<=18)) {
-                    //tmpSnifferData.strProto="ICMP(operational information indicating)";
-                    tmpSnifferData.protoInfo.strBasicInfo="operational information indicating";
-                } else if(htons(icmph->type)==8) {
-                    tmpSnifferData.protoInfo.strBasicInfo="Echo (ping) request:";
-
-                } else if(htons(icmph->type)==0) {
-                    tmpSnifferData.protoInfo.strBasicInfo="Echo (ping) reply:";
-
-                } else if(htons(icmph->type==3)) {
-                    tmpSnifferData.protoInfo.strBasicInfo="Unreachable Destination";
-                } else if(htons(icmph->type)==5) {
-                    tmpSnifferData.protoInfo.strBasicInfo="Redirect";
-                } else if(htons(icmph->type)==11) {
-                    tmpSnifferData.protoInfo.strBasicInfo="Out of time";
-                } else {
-                    //tmpSnifferData.protoInfo.strAppProto += "Unknown Proto";
-=======
                 if(icmpType==4||icmpType==12) {
                     //tmpSnifferData.strProto="ICMP(error messages)";
                     tmpSnifferData.protoInfo.strBasicInfo="errro message";
@@ -487,70 +451,14 @@ void CaptureThread::run()
                      tmpSnifferData.protoInfo.strBasicInfo="Membership Query:";
                  } else {
                      //pass
->>>>>>> yzydev
                 }
                 break;
-            case IGMP_SIG:
-                tmpSnifferData.strProto="IGMP";
-                tmpSnifferData.protoInfo.strNextProto+="IGMP(Internet Group Manager Protocol)";
-                tmpSnifferData.protoInfo.strTranProto+="IGMP(Internet Group Manager Protocol)";
-                igmph=(_igmp_header *)((unsigned char *)iph+ip_lenth);
-                if(htons(icmph->type)==0x22) {
-                    tmpSnifferData.protoInfo.strBasicInfo="Membership Report:";
-                    if(igmph->numberOfSrc>0) {
-                        char sizeMiltiCastAddr[24];//???
-                        sprintf(sizeMiltiCastAddr,"%d.%d.%d.%d",igmph->multicastAddress[0],igmph->multicastAddress[1],igmph->multicastAddress[2],igmph->multicastAddress[3]);
-                        if(htons(igmph->recordType)==4) {
-                            tmpSnifferData.protoInfo.strBasicInfo+="join group";
-                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
-                        } else if(htons(igmph->recordType)==3) {
-                            tmpSnifferData.protoInfo.strBasicInfo+="leave group";
-                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
-                        } else if(htons(igmph->recordType)==2){
-                            tmpSnifferData.protoInfo.strBasicInfo+="mode is exclude";
-                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
-                        } else if(htons(igmph->recordType)==1){
-                            tmpSnifferData.protoInfo.strBasicInfo+="mode is include";
-                            tmpSnifferData.protoInfo.strBasicInfo+=sizeMiltiCastAddr;
-                        } else {
-                            //pass
-                        }
-                    }
-                } else if(htons(icmph->type)==0x11) {
-                    tmpSnifferData.protoInfo.strBasicInfo="Membership Query:";
-                } else {
-                    //pass
-                }
-
             default:
                 LOG("Nothing captured!!!");
                 continue;
             }
+       }else if(htons(eth->eth_type)==2054) {
 
-<<<<<<< HEAD
-            char sizeSrcPort[6],sizeDstPort[6];
-            sprintf(sizeSrcPort,"%d",sport);
-            sprintf(sizeDstPort,"%d",dport);
-
-            tmpSnifferData.strSIP=sizeSrcAddr;
-            tmpSnifferData.strSIP=tmpSnifferData.strSIP+":"+sizeSrcPort;
-            tmpSnifferData.strDIP=sizeDstAddr;
-            tmpSnifferData.strDIP=tmpSnifferData.strDIP+":"+sizeDstPort;
-
-            tmpSnifferData.protoInfo.strSIP+=sizeSrcAddr;
-            tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
-            tmpSnifferData.protoInfo.strSPort+=sizeSrcPort;
-            tmpSnifferData.protoInfo.strDPort+=sizeDstPort;
-
-        }
-       /***************IP end****************************************/
-
-       /***************ARP begin*************************************/
-
-        else if(htons(eth->eth_type)==0x0806) {
-=======
-        }else if(htons(eth->eth_type)==2054) {
->>>>>>> yzydev
 
             LOG("it is arp packet")
 
@@ -636,12 +544,8 @@ void CaptureThread::run()
 
         sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
-<<<<<<< HEAD
 
-        if(flag) {
-=======
         if(flag==1&&bstop==false) {
->>>>>>> yzydev
             view->addPacketItem(tmpSnifferData);
 
         }

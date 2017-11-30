@@ -110,17 +110,10 @@ typedef struct _igmp_header
     unsigned char  type;
     unsigned char  maxRespCode;
     unsigned short crc;
-<<<<<<< HEAD
-    unsigned int   groupAddress;
-    unsigned short resvSQrvQQIC;//4+1+3+8
-    unsigned short numberOfSrc;
-    unsigned char   recordType;
-=======
     unsigned char   groupAddress[4];//ip
     unsigned short resvSQrvQQIC;//4+1+3+8
     unsigned short numberOfSrc;
     unsigned char   recordType;//data
->>>>>>> yzydev
     unsigned char   auxDataLen;
     unsigned short  numberOfGroupSrc;
     unsigned char    multicastAddress[4];
@@ -192,11 +185,6 @@ struct AnalyseProtoType
     QString 	strAppProto;		// 应用层
     QByteArray  strSendInfo;
     QString     strBasicInfo;
-<<<<<<< HEAD
-=======
-
-    
->>>>>>> yzydev
 
     void init()
     {
@@ -210,10 +198,6 @@ struct AnalyseProtoType
         strHeadLength = "协议头长度：";
         strLength     = "总长：";
         strNextProto  = "高层协议类型：";
-<<<<<<< HEAD
-        strSIP        = "";
-        strDIP        = "";
-=======
         strSIP        = "发送者IP地址: ";
         strDIP        = "目标IP地址: ";
         strSenderMac  = "发送者硬件地址";
@@ -223,13 +207,10 @@ struct AnalyseProtoType
         strArpHardSize="硬件地址长度: ";
         strArpProSize ="协议地址长度: ";
         strOpCode     ="操作类型: ";
->>>>>>> yzydev
 
         strTranProto  = "传输层 - ";
         strSPort      = "";
         strDPort      = "";
-<<<<<<< HEAD
-=======
         strSeqNo      ="序号: ";
         strAckNo      ="确认号: ";
         strChkSum     ="校验和: ";
@@ -238,7 +219,6 @@ struct AnalyseProtoType
         strIcmpType   ="类型: ";
         strIcmpCode   ="编码: ";
         strIgmpType   ="类型: ";
->>>>>>> yzydev
 
         strAppProto   = "应用层 - ";
         strBasicInfo  = "";
