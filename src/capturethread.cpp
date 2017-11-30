@@ -391,13 +391,10 @@ void CaptureThread::run()
 
         sniffer->snifferData.push_back((tmpSnifferData));  //should send info to listview
         // send information to UI to showed in qlistview
-<<<<<<< HEAD
-        if(flag==1&&bstop==false) {
-            emit sendSnifferInfoToUi(&tmpSnifferData);
-=======
+
         if(flag) {
             view->addPacketItem(tmpSnifferData);
->>>>>>> refs/remotes/origin/master
+
         }
 
         /*
