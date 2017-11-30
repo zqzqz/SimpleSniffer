@@ -176,6 +176,8 @@ void MainWindow::on_filter_textChanged(const QString &command)
     ui->filter->setPalette(palette);
 }
 
+
+
 void MainWindow::on_filter_returnPressed()
 {
     filter->loadCommand(ui->filter->text());
@@ -190,7 +192,7 @@ void MainWindow::showInfoInListView()
 
 
 void MainWindow::on_stop_clicked() {
-    //pass
+
 }
 
 void MainWindow::on_tableView_clicked(const QModelIndex &index)

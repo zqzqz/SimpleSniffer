@@ -101,6 +101,7 @@ void ListView::addPacketItem(SnifferData &tmpSnifferData, bool fnew)
     mainModel->setItem(index, 4, item);
     item = new QStandardItem(QString(tmpSnifferData.strLength));
     mainModel->setItem(index, 5, item);
+
     if(fnew) packets.push_back(tmpSnifferData);
 
     index++;

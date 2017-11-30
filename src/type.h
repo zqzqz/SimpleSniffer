@@ -1,6 +1,6 @@
 #ifndef TYPE_H_
 #define TYPE_H_
-#include <string>
+
 // Mac头部（14字节）
 typedef struct _eth_header
 {
@@ -98,11 +98,26 @@ typedef struct _udp_header
 //icmp头部
 typedef struct _icmp_header
 {
-    unsigned short     type;
-    unsigned short     code;
-    unsigned int       crc;
+    unsigned char     type;
+    unsigned char     code;
+    unsigned short     crc;
     
 }icmp_header;
+
+//igmp
+typedef struct _igmp_header
+{
+    unsigned char  type;
+    unsigned char  maxRespCode;
+    unsigned short crc;
+    unsigned char   groupAddress[4];//ip
+    unsigned short resvSQrvQQIC;//4+1+3+8
+    unsigned short numberOfSrc;
+    unsigned char   recordType;//data
+    unsigned char   auxDataLen;
+    unsigned short  numberOfGroupSrc;
+    unsigned char    multicastAddress[4];
+}igmp_header;
 
 // 定义一些应用层协议使用的端口号
 
@@ -147,13 +162,29 @@ struct AnalyseProtoType
     QString 	strNextProto;
     QString 	strSIP;
     QString 	strDIP;
+    QString     strSenderMac;
+    QString     strTargetMac;
+    QString     strArpHard;
+    QString     strArpPro;
+    QString     strArpHardSize;
+    QString     strArpProSize;
+    QString     strOpCode;
 
     QString 	strTranProto;		// 传输层
     QString 	strSPort;
     QString 	strDPort;
+    QString     strSeqNo;
+    QString     strAckNo;
+    QString     strWindowSize;
+    QString     strChkSum;
+    QString     strUdpLenth;
+    QString     strIcmpType;
+    QString     strIcmpCode;
+    QString     strIgmpType;
 
     QString 	strAppProto;		// 应用层
     QByteArray  strSendInfo;
+    QString     strBasicInfo;
 
     void init()
     {
@@ -163,18 +194,34 @@ struct AnalyseProtoType
         strType       = "以太网类型：";
 
         strNetTitle    = "网络层 - ";
-        strVersion    = "版本：IPv4";
+        strVersion    = "版本：IPv";
         strHeadLength = "协议头长度：";
         strLength     = "总长：";
         strNextProto  = "高层协议类型：";
-        strSIP        = "来源IP地址：";
-        strDIP        = "目标IP地址：";
+        strSIP        = "发送者IP地址: ";
+        strDIP        = "目标IP地址: ";
+        strSenderMac  = "发送者硬件地址";
+        strTargetMac  = "目标硬件地址";
+        strArpHard    ="硬件类型: ";
+        strArpPro     ="协议类型: ";
+        strArpHardSize="硬件地址长度: ";
+        strArpProSize ="协议地址长度: ";
+        strOpCode     ="操作类型: ";
 
         strTranProto  = "传输层 - ";
-        strSPort      = "来源端口号：";
-        strDPort      = "目标端口号：";
+        strSPort      = "";
+        strDPort      = "";
+        strSeqNo      ="序号: ";
+        strAckNo      ="确认号: ";
+        strChkSum     ="校验和: ";
+        strWindowSize ="窗口大小: ";
+        strUdpLenth   ="UDP数据包长度: ";
+        strIcmpType   ="类型: ";
+        strIcmpCode   ="编码: ";
+        strIgmpType   ="类型: ";
 
         strAppProto   = "应用层 - ";
+        strBasicInfo  = "";
     }
 };
 
@@ -186,6 +233,7 @@ struct SnifferData
     QString 			strSIP;			// 来源 IP 地址，格式 IP:port
     QString 			strDIP;			// 目标 IP 地址，格式 IP:port
     QString 			strProto;		// 使用的协议
+    QString             strProtoForShow;
     QString		        strLength;		// 数据长度
     QByteArray  		strData;		// 原始数据
     AnalyseProtoType	protoInfo;		// 树形显示结果的数据结构
