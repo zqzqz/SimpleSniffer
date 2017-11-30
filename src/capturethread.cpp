@@ -163,11 +163,7 @@ void CaptureThread::run()
             tmpSnifferData.protoInfo.strType+="Internet Protocol (0x0800)";
             tmpSnifferData.protoInfo.strNetTitle+="Internet Prtocol";
 
-
-
-
             iph=(_ip_header*)(sniffer->pktData+14);
-
 
             //get length of ip header
             ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
@@ -192,6 +188,58 @@ void CaptureThread::run()
 
             sprintf(sizeSrcAddr,"%d.%d.%d.%d",iph->saddr[0],iph->saddr[1],iph->saddr[2],iph->saddr[3]);
             sprintf(sizeDstAddr,"%d.%d.%d.%d",iph->daddr[0],iph->daddr[1],iph->daddr[2],iph->daddr[3]);
+
+            unsigned short ipTypeOfService=iph->tos;
+            unsigned short ipFlag=(iph->flags_fo & 0xF000)/8192;
+            unsigned short ipOffset=(iph->flags_fo & 0x1FFF);
+            unsigned short ipTimeToLive=iph->ttl;
+            char sizeIpTypeOfService[6],sizeIpIdentification[6],sizeIpFlag[6],sizeIpOffset[6],sizeIPTimeToLive[6],sizeIpHeadCrc[6];
+            //sprintf(sizeIpTypeOfService,"%u",ipTypeOfService);
+            sprintf(sizeIpIdentification,"%u",iph->identification);
+            sprintf(sizeIpFlag,"%u",ipFlag);
+            sprintf(sizeIpOffset,"%u",ipOffset);
+            sprintf(sizeIPTimeToLive,"%u",ipTimeToLive);
+            sprintf(sizeIpHeadCrc,"%u",iph->crc);
+
+            switch (ipTypeOfService) {
+            case 0:
+                tmpSnifferData.protoInfo.strIpServiceField+="Routine";
+                break;
+            case 1:
+                tmpSnifferData.protoInfo.strIpServiceField+="Priority";
+                break;
+            case 2:
+                tmpSnifferData.protoInfo.strIpServiceField+="Immediate";
+                break;
+            case 3:
+                tmpSnifferData.protoInfo.strIpServiceField+="Flash";
+                break;
+            case 4:
+                tmpSnifferData.protoInfo.strIpServiceField+="Flash Override";
+                break;
+            case 5:
+                tmpSnifferData.protoInfo.strIpServiceField+="CRI/TIC/ECP";
+                break;
+            case 6:
+                tmpSnifferData.protoInfo.strIpServiceField+="Internetwork Control";
+                break;
+            case 7:
+                tmpSnifferData.protoInfo.strIpServiceField+="Network Control";
+                break;
+            default:
+                break;
+            }
+            if(ipFlag==2) {
+                tmpSnifferData.protoInfo.strIpFlag+=" 0x02 (Don't Fragment)";
+            } else if (ipFlag==1) {
+                tmpSnifferData.protoInfo.strIpFlag+=" 0x01 (More Fragment)";
+            } else {
+                //pass
+            }
+            tmpSnifferData.protoInfo.strIpIdentification+=sizeIpIdentification;
+            tmpSnifferData.protoInfo.strIpOffset+=sizeIpOffset;
+            tmpSnifferData.protoInfo.strIpTimeTOLive+=sizeIPTimeToLive;
+            tmpSnifferData.protoInfo.strIpHeadCrc+=sizeIpHeadCrc;
 
             //above:finished processing ip header
 
@@ -239,6 +287,37 @@ void CaptureThread::run()
                 tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
                 tmpSnifferData.protoInfo.strSPort+=sizeTcpSrcPort;
                 tmpSnifferData.protoInfo.strDPort+=sizeTcpDstPort;
+
+                unsigned short tcpHeadLength,tcpFlag;
+                tcpHeadLength=tcph->thl;
+                tcpHeadLength*=4;
+                tcpFlag=tcph->flag;
+                char sizeTcpHeadLength[6],sizeTcpFlag[6];
+                sprintf(sizeTcpHeadLength,"%u",tcpHeadLength);
+                sprintf(sizeTcpFlag,"%u",tcpFlag);
+                tmpSnifferData.protoInfo.strTcpHeadLength+=sizeTcpHeadLength;
+                tmpSnifferData.protoInfo.strTcpHeadLength+=" bytes";
+                tmpSnifferData.protoInfo.strTcpFlag+=sizeTcpFlag;
+               //deal with tcp flags
+                if((tcpFlag % 2)==1) {
+                    tmpSnifferData.protoInfo.strTcpFlag+=" FIN";
+                }
+                if((tcpFlag % 4)>=2) {
+                    tmpSnifferData.protoInfo.strTcpFlag+=" SYN";
+                }
+                if((tcpFlag % 8)>=4) {
+                    tmpSnifferData.protoInfo.strTcpFlag+=" RST";
+                }
+                if((tcpFlag % 16)>=8) {
+                    tmpSnifferData.protoInfo.strTcpFlag+=" PSH";
+                }
+                if((tcpFlag % 32)>=16) {
+                    tmpSnifferData.protoInfo.strTcpFlag+=" ACK";
+                }
+                if((tcpFlag % 64)>=32) {
+                    tmpSnifferData.protoInfo.strTcpFlag+=" URG";
+                }
+
 
 
                 if(sport==FTP_PORT||dport==FTP_PORT) {
@@ -409,11 +488,14 @@ void CaptureThread::run()
                 tmpSnifferData.protoInfo.strSIP+=sizeSrcAddr;
                 tmpSnifferData.protoInfo.strDIP+=sizeDstAddr;
 
-                char sizeIgmpType[3],sizeIgmpCrc[6];
+                unsigned short igmpMaxRespCode=igmph->maxRespCode;
+                char sizeIgmpCrc[6],sizeIgmpMaxRespCode[6];
 
                 sprintf(sizeIgmpCrc,"%u",ntohs(igmph->crc));
+                sprintf(sizeIgmpMaxRespCode,"%u",igmpMaxRespCode);
 
                 tmpSnifferData.protoInfo.strChkSum+=sizeIgmpCrc;
+                tmpSnifferData.protoInfo.strIgmpMaxTime+=sizeIgmpMaxRespCode;
 
                 unsigned short igmpType,igmpRecordType;
                 igmpType=igmph->type;
@@ -423,6 +505,9 @@ void CaptureThread::run()
                     tmpSnifferData.protoInfo.strIgmpType+="Membership Report (0x22)";
                 } else {
                     tmpSnifferData.protoInfo.strIgmpType+="Membership Query (0x11)";
+                    char sizeIgmpGroupAddr[24];
+                    sprintf(sizeIgmpGroupAddr,"%d.%d.%d.%d",igmph->groupAddress[0],igmph->groupAddress[1],igmph->groupAddress[2],igmph->groupAddress[3]);
+                    tmpSnifferData.protoInfo.strIgmpGroupAddr+=sizeIgmpGroupAddr;
                 }
 
 

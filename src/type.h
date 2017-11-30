@@ -158,10 +158,17 @@ struct AnalyseProtoType
     QString 	strNetTitle;			// 网络层
     QString 	strVersion;
     QString 	strHeadLength;
+    QString     strIpServiceField;
     QString 	strLength;
+    QString     strIpIdentification;
+    QString     strIpFlag;
+    QString     strIpOffset;
+    QString     strIpTimeTOLive;
     QString 	strNextProto;
+    QString     strIpHeadCrc;
     QString 	strSIP;
     QString 	strDIP;
+    QString     strIpOptions;
     QString     strSenderMac;
     QString     strTargetMac;
     QString     strArpHard;
@@ -175,12 +182,20 @@ struct AnalyseProtoType
     QString 	strDPort;
     QString     strSeqNo;
     QString     strAckNo;
+    QString     strTcpHeadLength;
+    QString     strTcpFlag;
     QString     strWindowSize;
     QString     strChkSum;
+    QString     strTcpOptions;
+
     QString     strUdpLenth;
+
     QString     strIcmpType;
     QString     strIcmpCode;
+
     QString     strIgmpType;
+    QString     strIgmpMaxTime;
+    QString     strIgmpGroupAddr;
 
     QString 	strAppProto;		// 应用层
     QByteArray  strSendInfo;
@@ -192,14 +207,22 @@ struct AnalyseProtoType
         strDMac       = "";
         strSMac       = "";
         strType       = "以太网类型：";
-
+/*************************************************************************/
         strNetTitle    = "网络层 - ";
         strVersion    = "版本：IPv";
         strHeadLength = "协议头长度：";
+        strIpServiceField ="服务类型: ";
         strLength     = "总长：";
+        strIpIdentification ="标识: ";
+        strIpFlag     ="标志: ";
+        strIpOffset   ="片偏移: ";
+        strIpTimeTOLive ="生存时间: ";
         strNextProto  = "高层协议类型：";
+        strIpHeadCrc  ="头部校验和: ";
         strSIP        = "发送者IP地址: ";
         strDIP        = "目标IP地址: ";
+        strIpOptions  = "Ip可选项:";
+
         strSenderMac  = "发送者硬件地址";
         strTargetMac  = "目标硬件地址";
         strArpHard    ="硬件类型: ";
@@ -207,19 +230,27 @@ struct AnalyseProtoType
         strArpHardSize="硬件地址长度: ";
         strArpProSize ="协议地址长度: ";
         strOpCode     ="操作类型: ";
-
+/***************************************************************************/
         strTranProto  = "传输层 - ";
         strSPort      = "";
         strDPort      = "";
         strSeqNo      ="序号: ";
         strAckNo      ="确认号: ";
+        strTcpHeadLength ="Tcp首部长度: ";
+        strTcpFlag    ="Tcp标志: ";
         strChkSum     ="校验和: ";
         strWindowSize ="窗口大小: ";
+        strTcpOptions ="Tcp可选项: ";
+
         strUdpLenth   ="UDP数据包长度: ";
+
         strIcmpType   ="类型: ";
         strIcmpCode   ="编码: ";
-        strIgmpType   ="类型: ";
 
+        strIgmpType   ="类型: ";
+        strIgmpMaxTime="最大响应时延: ";
+        strIgmpGroupAddr  ="组地址: ";
+/*************************************************************************/
         strAppProto   = "应用层 - ";
         strBasicInfo  = "";
     }
