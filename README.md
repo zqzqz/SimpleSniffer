@@ -21,7 +21,12 @@ Please do not push sniffer.pro.user anymore. Conflicts will happen.
       * Packets 
 
 ## Current tasks
-* analyse packets upon different protocols
+* waiting for ultimate tree structure to implement new features
+* IP slides reunited (undo)
+* analyse file type which packets transmit (undo)
+* search and filtrate packets by protocal content (soon)
+* clicked right mouse on TreeView can save current packet info to file (finished)
+* analyse packets upon different protocols 
   * implement code in capturethread.cpp: run
   * show brief packets' info in List View (finished)
   * show detail in a tree structure (untested)
@@ -29,9 +34,9 @@ Please do not push sniffer.pro.user anymore. Conflicts will happen.
 * file operation
   * choose a file to save captured data (untested)
   * load a file with packets' data  (untested)
-* packets filter
+* packets filter (finished)
   * set standard rules and check user's input (finished)
-  * filtrate packets with fixed rules
+  * filtrate packets with fixed rules (finished)
 * using a dialog to choose network (finished)
   * dialog should show network info (finished)
   * user choose network in a list (finished)
