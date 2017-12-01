@@ -19,7 +19,7 @@ Filter::~Filter()
 bool Filter::checkCommand(QString command)
 {
     //LOG(command.toLatin1().data());
-    std::string pattern{ "([ ]*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-C[ ]\\w+))[ ]+)*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-C[ ]\\w+))?" };
+    std::string pattern{ "([ ]*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-c[ ]\\w+))[ ]+)*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-c[ ]\\w+))?" };
     std::regex re(pattern);
     return std::regex_match(command.toStdString(), re);
 }
@@ -106,13 +106,16 @@ void Filter::launchFilter(MultiView *view)
                 tmpDPort = tmpDPort.substr(tmpDPort.find_first_of(':')+1);
                 LOG(tmpDPort.data());
                 if(iQuery->second.find(tmpDPort.data()) != 0) {
-                    LOG("fail");
                     flag = false;
                 }
                 break;
             }
             case(C):{
-
+                std::string text = QString(iSnifferData->protoInfo.strSendInfo).toStdString();
+                if(text.find(iQuery->second) >= text.size()) {
+                    flag = false;
+                }
+                break;
             }
             }
             if (!flag) break;
