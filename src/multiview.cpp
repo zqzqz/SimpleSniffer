@@ -1,5 +1,7 @@
 #include "multiview.h"
 #include <iostream>
+#include <stdio.h>
+#include <netinet/in.h>
 #include "log.h"
 
 MultiView::~MultiView()
@@ -40,152 +42,316 @@ void MultiView::reload()
  */
 void MultiView::setTreeViewByIndex(SnifferData snifferData)
 {
-    QStandardItem *item, *itemChild;
+    QStandardItem *item, *itemChild, *itemSub;
     QModelIndex index;
 
-    item = new QStandardItem(snifferData.protoInfo.strEthTitle);
+    //preparation part
+    QString sip = snifferData.strSIP.mid(0, snifferData.strSIP.indexOf(QObject::tr(":")));
+    QString dip = snifferData.strDIP.mid(0, snifferData.strDIP.indexOf(QObject::tr(":")));
+
+
+    /**********************   physical layer begin ***********************/
+    item = new QStandardItem(QObject::tr("Ethereum II"));
     treeModel->setItem(0, item);
     index = treeModel->item(0)->index();
-    treeView->setExpanded(index, true);
+    //treeView->setExpanded(index, true);
 
-    itemChild = new QStandardItem(snifferData.protoInfo.strDMac);
+    _eth_header* peth = (_eth_header*)snifferData.protoInfo.peth;
+
+    QByteArray DMac,SMac;
+    DMac.setRawData((const char *)peth->dstmac,6);
+    SMac.setRawData((const char *)peth->srcmac,6);
+    DMac=DMac.toHex().toUpper();
+    SMac=SMac.toHex().toUpper();
+    QString smac = SMac[0]+SMac[1]+QObject::tr("-")+SMac[2]+SMac[3]+QObject::tr("-")+SMac[4]+SMac[5]+QObject::tr("-")+SMac[6]+SMac[7]+QObject::tr("-")+SMac[8]+SMac[9]+QObject::tr("-")+SMac[10]+SMac[11];
+    QString dmac = DMac[0]+DMac[1]+QObject::tr("-")+DMac[2]+DMac[3]+QObject::tr("-")+DMac[4]+DMac[5]+QObject::tr("-")+DMac[6]+DMac[7]+QObject::tr("-")+DMac[8]+DMac[9]+QObject::tr("-")+DMac[10]+DMac[11];
+
+    itemChild = new QStandardItem(QObject::tr("Destination: ")+dmac);
     item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strSMac);
-    item->appendRow(itemChild);
-    itemChild = new QStandardItem(snifferData.protoInfo.strType);
+    itemChild = new QStandardItem(QObject::tr("Source: ")+smac);
     item->appendRow(itemChild);
 
-    item = new QStandardItem(snifferData.protoInfo.strNetTitle);
-    treeModel->setItem(1, item);
-    index = treeModel->item(1)->index();
-    treeView->setExpanded(index, true);
 
-
-/************************************network layer*******************************************/
-    if((snifferData.strProto.toStdString())=="ARP") {
-        itemChild = new QStandardItem(snifferData.protoInfo.strArpHard);
+    switch (htons(peth->eth_type)) {
+    case(EPT_IP): {
+        itemChild = new QStandardItem(QObject::tr("Ethernet Type: IPV4 (0x0800)"));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strArpPro);
+        break;
+    }
+    case(EPT_ARP): {
+        itemChild = new QStandardItem(QObject::tr("Ethernet Type: Address Resolution Protocol (0x0806)"));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strArpHardSize);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strArpProSize);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strOpCode);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strSenderMac);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strSIP);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strTargetMac);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strDIP);
-        item->appendRow(itemChild);
-        return;
-    } else {
-        itemChild = new QStandardItem(snifferData.protoInfo.strVersion);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strHeadLength);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIpServiceField);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strLength);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIpIdentification);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIpFlag);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIpOffset);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIpTimeTOLive);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strNextProto);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIpHeadCrc);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strSIP);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strDIP);
-        item->appendRow(itemChild);
-
+        break;
+    }
+    default: return;
     }
 
+    /**********************   physical layer end ***********************/
+    /**********************   transmission layer begin ***********************/
 
+    switch (snifferData.protoInfo.ipFlag) {
+    case(EPT_IP): {
+        item = new QStandardItem(QObject::tr("Internet Protocol"));
+        treeModel->setItem(1, item);
+        index = treeModel->item(1)->index();
+        //treeView->setExpanded(index, true);
 
-
-
-/*******************************************transport layer***********************************************/
-    snifferData.protoInfo.strTranProto+=snifferData.strProtoForShow;
-    item = new QStandardItem(snifferData.protoInfo.strTranProto);
-    treeModel->setItem(2, item);
-    index = treeModel->item(2)->index();
-    treeView->setExpanded(index, true);
-
-    if((snifferData.strProto.toStdString()).substr(0,3)=="TCP") {
-        snifferData.protoInfo.strSPort="源端口: "+snifferData.protoInfo.strSPort;
-        snifferData.protoInfo.strDPort="目的端口: "+snifferData.protoInfo.strDPort;
-        itemChild = new QStandardItem(snifferData.protoInfo.strSPort);
+        _ip_header* iph = (_ip_header*) snifferData.protoInfo.pip;
+        itemChild = new QStandardItem(QObject::tr("Version: ")+QString::number((iph->ver_ihl & 0xF0)/16, 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strDPort);
+        itemChild = new QStandardItem(QObject::tr("Header Length: ")+QString::number((iph->ver_ihl & 0x0F)*4, 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strSeqNo);
+        itemChild = new QStandardItem(QObject::tr("Total Length: ")+QString::number(ntohs(iph->tlen), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strAckNo);
+        itemChild = new QStandardItem(QObject::tr("Identification: 0x")+QString::number(ntohs(iph->identification), 16) +QObject::tr("  ")+ QString::number((iph->identification), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strTcpHeadLength);
+        itemSub = new QStandardItem(QObject::tr("Flags"));
+        item->appendRow(itemSub);
+        //treeView->setExpanded(itemSub->index(), true);
+        itemChild = new QStandardItem(QObject::tr("Reserved Bit: ")+QString::number((iph->flags_fo & 0x8000)/128/256, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Don't Fragment: ")+QString::number((iph->flags_fo & 0x4000)/64/256, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("More Fragment: ")+QString::number((iph->flags_fo & 0x2000)/32/256, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Fragment Offset: ")+QString::number((iph->flags_fo & 0x1FFF), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strTcpFlag);
+        itemChild = new QStandardItem(QObject::tr("Time to Live: ")+QString::number(ntohs(iph->ttl), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strWindowSize);
+        itemChild = new QStandardItem(QObject::tr("Protocal: ")+snifferData.protoInfo.ipProto);
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
+        itemChild = new QStandardItem(QObject::tr("Source: ")+sip);
         item->appendRow(itemChild);
-    } else if((snifferData.strProto.toStdString()).substr(0,3)=="UDP") {
-        snifferData.protoInfo.strSPort="源端口: "+snifferData.protoInfo.strSPort;
-        snifferData.protoInfo.strDPort="目的端口: "+snifferData.protoInfo.strDPort;
-        itemChild = new QStandardItem(snifferData.protoInfo.strSPort);
+        itemChild = new QStandardItem(QObject::tr("Destination: ")+dip);
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strDPort);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strUdpLenth);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
-        item->appendRow(itemChild);
-
-    } else if((snifferData.strProto.toStdString())=="ICMP") {
-        itemChild = new QStandardItem(snifferData.protoInfo.strIcmpType);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIcmpCode);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
-        item->appendRow(itemChild);
-        return;
-
-    } else if((snifferData.strProto.toStdString())=="IGMP") {
-        itemChild = new QStandardItem(snifferData.protoInfo.strIgmpType);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIgmpMaxTime);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
-        item->appendRow(itemChild);
-        itemChild = new QStandardItem(snifferData.protoInfo.strIgmpGroupAddr);
-        item->appendRow(itemChild);
-        return;
-    } else {
-        return; //pass
+        break;
     }
+    case(EPT_ARP): {
+        item = new QStandardItem(QObject::tr("Address Resolution Protocol"));
+        treeModel->setItem(1, item);
+        index = treeModel->item(1)->index();
+        //treeView->setExpanded(index, true);
 
+        _arp_header* arph = (_arp_header*) snifferData.protoInfo.pip;
+        itemChild = new QStandardItem(QObject::tr("Hardware Type: ")+QObject::tr("Ethernet (1)")); //fake
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Protocol Type: ")+QObject::tr("IPV4 (0x0800)")); //fake
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Hardware Size: ")+QString::number(arph->arp_hln, 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Protocol Size: ")+QString::number(arph->arp_pln, 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Opcode: ")+ ((htons(arph->arp_op)==0x0001)? QObject::tr("Request (1)"):QObject::tr("Reply (2)") ) );
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Sender MAC Address: ")+smac);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Sender IP Address: ")+sip);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Target MAC Adress: ")+dmac);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Target IP Adress: ")+dip);
+        item->appendRow(itemChild);
+    }
+    default: return;
+    }
+    /**********************  transmission layer end ***********************/
+    /**********************  network layer begin ***********************/
 
-/***********************************application layer****************************************************/
+    switch(snifferData.protoInfo.tcpFlag){
+    case(TCP_SIG): {
+        item = new QStandardItem(QObject::tr("Transmission Control Protocol"));
+        treeModel->setItem(2, item);
+        index = treeModel->item(2)->index();
+        //treeView->setExpanded(index, true);
 
-    item = new QStandardItem(snifferData.protoInfo.strAppProto);
+        _tcp_header* tcph = (_tcp_header*) snifferData.protoInfo.ptcp;
+        itemChild = new QStandardItem(QObject::tr("Source Port: ")+QString::number(htons(tcph->sport), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Destination Port: ")+QString::number(htons(tcph->dport), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Sequence Number: ")+QString::number(htons(tcph->seq_no), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Acknowledgment Number: ")+QString::number(htons(tcph->ack_no), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Header Length: ")+QString::number(htons(tcph->thl)*4, 10));
+        item->appendRow(itemChild);
+        itemSub = new QStandardItem(QObject::tr("Flags"));
+        item->appendRow(itemSub);
+        //treeView->setExpanded(itemSub->index(), true);
+        itemChild = new QStandardItem(QObject::tr("Reserved: ")+QString::number((tcph->flag)>>9, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Nonce: ")+QString::number((tcph->flag & 0x100)/256, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("CWR: ")+QString::number((tcph->flag & 0x80)/128, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("ECN-Echo: ")+QString::number((tcph->flag & 0x40)/64, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Urgent: ")+QString::number((tcph->flag & 0x20)/32, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("ACK: ")+QString::number((tcph->flag & 0x10)/16, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Push: ")+QString::number((tcph->flag & 0x8)/8, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Reset: ")+QString::number((tcph->flag & 0x4)/4, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Syn: ")+QString::number((tcph->flag & 0x2)/2, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Fin: ")+QString::number((tcph->flag & 0x1), 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Header Length: ")+QString::number(tcph->wnd_size, 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(tcph->chk_sum, 16));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Urgent Pointer: ")+QString::number(tcph->urgt_p, 10));
+        item->appendRow(itemChild);
+        itemSub = new QStandardItem(QObject::tr("Options"));
+        item->appendRow(itemSub);
+        //treeView->setExpanded(itemSub->index(), true);
+        break;
+    }
+    case(UDP_SIG): {
+        item = new QStandardItem(QObject::tr("User Datagram Protocol"));
+        treeModel->setItem(2, item);
+        index = treeModel->item(2)->index();
+        //treeView->setExpanded(index, true);
+
+        _udp_header* udph = (_udp_header*) snifferData.protoInfo.ptcp;
+        itemChild = new QStandardItem(QObject::tr("Source Port: ")+QString::number(htons(udph->sport), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Destination Port: ")+QString::number(htons(udph->dport), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Length: ")+QString::number(htons(udph->len), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(udph->crc, 16));
+        item->appendRow(itemChild);
+        break;
+    }
+    case(ICMP_SIG): {
+        QString icmpType;
+        item = new QStandardItem(QObject::tr("Internet Control Message Protocol"));
+        treeModel->setItem(2, item);
+        index = treeModel->item(2)->index();
+        //treeView->setExpanded(index, true);
+
+        _icmp_header* icmph = (_icmp_header*) snifferData.protoInfo.ptcp;
+        switch(icmph->type) {
+        case 8:
+            icmpType = QObject::tr("(Echo (ping) request)");
+            break;
+        case 0:
+            icmpType = QObject::tr("(Echo (ping) reply)");
+            break;
+        case 3:
+            icmpType = QObject::tr("(Destination Unreachable)");
+            break;
+        case 4:
+            icmpType = QObject::tr("(Source Quench)");
+            break;
+        case 5:
+            icmpType = QObject::tr("(Redirect(Change route))");
+            break;
+        case 11:
+            icmpType = QObject::tr("(Time Exceeded)");
+            break;
+        case 12:
+            icmpType = QObject::tr("(Parameter Problem)");
+            break;
+        case 13:
+            icmpType = QObject::tr("(Timestamp Request)");
+            break;
+        case 14:
+            icmpType = QObject::tr("(Timestamp Reply)");
+            break;
+        case 15:
+            icmpType = QObject::tr("(Information Request)");
+            break;
+        case 16:
+            icmpType = QObject::tr("(Information Reply)");
+            break;
+        case 17:
+            icmpType = QObject::tr("(Address Mask Request)");
+            break;
+        case 18:
+            icmpType = QObject::tr("(Address Mask Reply)");
+            break;
+        default:
+            break;
+        }
+        itemChild = new QStandardItem(QObject::tr("Type: ")+QString::number(icmph->type, 10)+QObject::tr("  ")+icmpType);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Code: ")+QString::number(icmph->code, 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(icmph->crc, 16));
+        item->appendRow(itemChild);
+        break;
+    }
+    case(IGMP_SIG): {
+        QString recordType;
+        char ip[24];
+        item = new QStandardItem(QObject::tr("Internet Group Management Protocol"));
+        treeModel->setItem(2, item);
+        index = treeModel->item(2)->index();
+        //treeView->setExpanded(index, true);
+
+        _igmp_header* igmph = (_igmp_header*) snifferData.protoInfo.ptcp;
+        if (igmph->type == 0x22) {
+            itemChild = new QStandardItem(QObject::tr("Type: Membership Report (0x22)"));
+            item->appendRow(itemChild);
+        }
+        else {
+            itemChild = new QStandardItem(QObject::tr("Type: Membership Query (0x11)"));
+            item->appendRow(itemChild);
+        }
+        itemChild = new QStandardItem(QObject::tr("Max Response Code: ") + QString::number(htons(igmph->maxRespCode), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Checksum: ") + QString::number(igmph->crc, 16));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Num Group Record: ") + QString::number(igmph->numberOfGroupSrc));
+        item->appendRow(itemChild);
+        itemSub = new QStandardItem(QObject::tr("Group Record"));
+        item->appendRow(itemSub);
+        //treeView->setExpanded(itemSub->index(), true);
+
+        switch(igmph->recordType) {
+        case(1): recordType = QObject::tr("Include");break;
+        case(2): recordType = QObject::tr("Exclude");break;
+        case(3): recordType = QObject::tr("Leave Group");break;
+        case(4): recordType = QObject::tr("Join Group");
+        }
+        itemChild = new QStandardItem(QObject::tr("Record Type: ")+recordType);
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Aux Data Len: ") + QString::number(igmph->auxDataLen, 10));
+        itemSub->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Num Src: ") + QString::number(igmph->numberOfSrc, 10));
+        itemSub->appendRow(itemChild);
+        sprintf(ip, "%d.%d.%d.%d", igmph->groupAddress[0], igmph->groupAddress[1], igmph->groupAddress[2], igmph->groupAddress[3]);
+        itemChild = new QStandardItem(QObject::tr("Multicast Address: ") + QString(QLatin1String(ip)));
+        itemSub->appendRow(itemChild);
+        break;
+    }
+    default: return;
+    }
+    /************************* network layer end ********************************/
+    /************************* application layer begin *****************************/
+    QString appPro;
+    switch(snifferData.protoInfo.appFlag) {
+    case(FTP_PORT): appPro = QObject::tr("FTP(File Transfer Protocol)");break;
+    case(TELNET_PORT): appPro = QObject::tr("TELNET");break;
+    case(SMTP_PORT): appPro = QObject::tr("SMTP(Simple Message Transfer Protocol)");break;
+    case(POP3_PORT): appPro = QObject::tr("POP3 (Post Office Protocol 3)");break;
+    case(HTTPS_PORT): appPro = QObject::tr("HTTPS (Hypertext Transfer Protocol over Secure Socket Layer)");break;
+    case(HTTP_PORT): appPro = QObject::tr("HTTP (Hyper Text Transport Protocol)");break;
+    case(DNS_PORT): appPro = QObject::tr("DNS (Domain Name Server)");break;
+    case(SNMP_PORT): appPro = QObject::tr("SNMP (Simple Network Management Protocol)");break;
+    }
+    item = new QStandardItem(appPro);
     treeModel->setItem(3, item);
     index = treeModel->item(3)->index();
-    treeView->setExpanded(index, true);
-    itemChild = new QStandardItem(snifferData.protoInfo.strBasicInfo);
+    //treeView->setExpanded(index, true);
+    itemChild = new QStandardItem(QObject::tr("Data: ") + QString(snifferData.protoInfo.strSendInfo));
     item->appendRow(itemChild);
-
 }
+
 
 /*
  * called by MultiView::packetInfoByIndex
@@ -219,7 +385,6 @@ void MultiView::setHexViewByIndex(SnifferData snifferData)
     }
 
 }
-
 
 QList<QStandardItem*> MultiView::returnTreeItems()
 {

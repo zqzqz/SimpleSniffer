@@ -79,9 +79,7 @@ typedef struct _tcp_header
     unsigned int	seq_no;				// 序列号
     unsigned int	ack_no;				// 确认号
     unsigned char	thl:4;				// tcp头部长度
-    unsigned char	reserved_1:4;		// 保留6位中的4位首部长度
-    unsigned char	reseverd_2:2;		// 保留6位中的2位
-    unsigned char	flag:6;				// 6位标志
+    unsigned short	flag:12;				// 12位标志
     unsigned short	wnd_size;			// 16位窗口大小
     unsigned short	chk_sum;			// 16位TCP检验和
     unsigned short	urgt_p;				// 16为紧急指针
@@ -125,7 +123,7 @@ typedef struct _igmp_header
 
 // TCP 协议
 #define FTP_PORT 		(21)
-#define TELNET_PORT 	　　　　　　　　(23)
+#define TELNET_PORT     (23)
 #define SMTP_PORT 		(25)
 #define HTTP_PORT  		(80)
 #define HTTPS_PORT		(443)
@@ -135,6 +133,7 @@ typedef struct _igmp_header
 // UDP 协议
 #define DNS_PORT		(53)
 #define SNMP_PORT		(161)
+
 
 // 网络设备信息结构
 struct NetDevInfo
@@ -149,113 +148,17 @@ struct NetDevInfo
 
 #include <QString>
 
-// 树形显示结果的数据结构，这个数据结构可能需要改一波，不然配不上arp
+// 树形显示结果的数据结构
 struct AnalyseProtoType
 {
-    QString 	strEthTitle;		// 数据链路层
-    QString 	strDMac;
-    QString 	strSMac;
-    QString 	strType;
-
-    QString 	strNetTitle;			// 网络层
-    QString 	strVersion;
-    QString 	strHeadLength;
-    QString     strIpServiceField;
-    QString 	strLength;
-    QString     strIpIdentification;
-    QString     strIpFlag;
-    QString     strIpOffset;
-    QString     strIpTimeTOLive;
-    QString 	strNextProto;
-    QString     strIpHeadCrc;
-    QString 	strSIP;
-    QString 	strDIP;
-    QString     strIpOptions;
-    QString     strSenderMac;
-    QString     strTargetMac;
-    QString     strArpHard;
-    QString     strArpPro;
-    QString     strArpHardSize;
-    QString     strArpProSize;
-    QString     strOpCode;
-
-    QString 	strTranProto;		// 传输层
-    QString 	strSPort;
-    QString 	strDPort;
-    QString     strSeqNo;
-    QString     strAckNo;
-    QString     strTcpHeadLength;
-    QString     strTcpFlag;
-    QString     strWindowSize;
-    QString     strChkSum;
-    QString     strTcpOptions;
-
-    QString     strUdpLenth;
-
-    QString     strIcmpType;
-    QString     strIcmpCode;
-
-    QString     strIgmpType;
-    QString     strIgmpMaxTime;
-    QString     strIgmpGroupAddr;
-
-    QString 	strAppProto;		// 应用层
-    QByteArray  strSendInfo;
-    QString     strBasicInfo;
-
-    void init()
-    {
-        strEthTitle   = "数据链路层 - Ethrmet II";
-        strDMac       = "";
-        strSMac       = "";
-        strType       = "以太网类型：";
-/*************************************************************************/
-        strNetTitle    = "网络层 - ";
-        strVersion    = "版本：IPv";
-        strHeadLength = "协议头长度：";
-        strIpServiceField ="服务类型: ";
-        strLength     = "总长：";
-        strIpIdentification ="标识: ";
-        strIpFlag     ="标志: ";
-        strIpOffset   ="片偏移: ";
-        strIpTimeTOLive ="生存时间: ";
-        strNextProto  = "高层协议类型：";
-        strIpHeadCrc  ="头部校验和: ";
-        strSIP        = "发送者IP地址: ";
-        strDIP        = "目标IP地址: ";
-        strIpOptions  = "Ip可选项:";
-
-        strSenderMac  = "发送者硬件地址";
-        strTargetMac  = "目标硬件地址";
-        strArpHard    ="硬件类型: ";
-        strArpPro     ="协议类型: ";
-        strArpHardSize="硬件地址长度: ";
-        strArpProSize ="协议地址长度: ";
-        strOpCode     ="操作类型: ";
-/***************************************************************************/
-        strTranProto  = "传输层 - ";
-        strSPort      = "";
-        strDPort      = "";
-        strSeqNo      ="序号: ";
-        strAckNo      ="确认号: ";
-        strTcpHeadLength ="Tcp首部长度: ";
-        strTcpFlag    ="Tcp标志: ";
-        strChkSum     ="校验和: ";
-        strWindowSize ="窗口大小: ";
-        strTcpOptions ="Tcp可选项: ";
-
-        strUdpLenth   ="UDP数据包长度: ";
-
-        strIcmpType   ="类型: ";
-        strIcmpCode   ="编码: ";
-
-        strIgmpType   ="类型: ";
-        strIgmpMaxTime="最大响应时延: ";
-        strIgmpGroupAddr  ="组地址: ";
-/*************************************************************************/
-        strAppProto   = "应用层 - ";
-        strBasicInfo  = "";
-    }
+    uint ipFlag;
+    uint tcpFlag;
+    uint appFlag;
+    void* peth;
+    void* pip;
+    void* ptcp;
+    QString ipProto;
+    QByteArray strSendInfo;
 };
 
 // 捕获的数据结构

@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
-     <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0,0,0,0" columnstretch="2,0">
+     <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0,0,0,0" columnstretch="2,1">
       <item row="3" column="0" colspan="2">
        <widget class="QTableView" name="tableView">
         <property name="lineWidth">
@@ -41,7 +41,7 @@
        <widget class="QTextBrowser" name="textBrowser">
         <property name="font">
          <font>
-          <pointsize>11</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
        </widget>
