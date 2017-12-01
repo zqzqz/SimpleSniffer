@@ -87,9 +87,21 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strHeadLength);
         item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIpServiceField);
+        item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strLength);
         item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIpIdentification);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIpFlag);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIpOffset);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIpTimeTOLive);
+        item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strNextProto);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIpHeadCrc);
         item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strSIP);
         item->appendRow(itemChild);
@@ -120,6 +132,10 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strAckNo);
         item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strTcpHeadLength);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strTcpFlag);
+        item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strWindowSize);
         item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
@@ -148,7 +164,11 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
     } else if((snifferData.strProto.toStdString())=="IGMP") {
         itemChild = new QStandardItem(snifferData.protoInfo.strIgmpType);
         item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIgmpMaxTime);
+        item->appendRow(itemChild);
         itemChild = new QStandardItem(snifferData.protoInfo.strChkSum);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(snifferData.protoInfo.strIgmpGroupAddr);
         item->appendRow(itemChild);
         return;
     } else {
