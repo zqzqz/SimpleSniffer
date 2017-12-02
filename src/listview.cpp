@@ -85,26 +85,27 @@ void ListView::rebuildInfo()
  * called by CaptureThread::run
  * add a new packet
  */
-void ListView::addPacketItem(SnifferData &tmpSnifferData, bool fnew)
+void ListView::addPacketItem(SnifferData &tmpSnifferData, bool fnew, bool display)
 {
-    QStandardItem *item;
+    if (display) {
+        QStandardItem *item;
 
-    item = new QStandardItem(QString(tmpSnifferData.strNum));
-    mainModel->setItem(index, 0, item);
-    item = new QStandardItem(QString(tmpSnifferData.strTime));
-    mainModel->setItem(index, 1, item);
-    item = new QStandardItem(QString(tmpSnifferData.strSIP));
-    mainModel->setItem(index, 2, item);
-    item = new QStandardItem(QString(tmpSnifferData.strDIP));
-    mainModel->setItem(index, 3, item);
-    item = new QStandardItem(QString(tmpSnifferData.strProto));
-    mainModel->setItem(index, 4, item);
-    item = new QStandardItem(QString(tmpSnifferData.strLength));
-    mainModel->setItem(index, 5, item);
+        item = new QStandardItem(QString(tmpSnifferData.strNum));
+        mainModel->setItem(index, 0, item);
+        item = new QStandardItem(QString(tmpSnifferData.strTime));
+        mainModel->setItem(index, 1, item);
+        item = new QStandardItem(QString(tmpSnifferData.strSIP));
+        mainModel->setItem(index, 2, item);
+        item = new QStandardItem(QString(tmpSnifferData.strDIP));
+        mainModel->setItem(index, 3, item);
+        item = new QStandardItem(QString(tmpSnifferData.strProto));
+        mainModel->setItem(index, 4, item);
+        item = new QStandardItem(QString(tmpSnifferData.strLength));
+        mainModel->setItem(index, 5, item);
+        index++;
+    }
 
     if(fnew) packets.push_back(tmpSnifferData);
-
-    index++;
 }
 
 /*

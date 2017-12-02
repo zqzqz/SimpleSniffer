@@ -52,13 +52,70 @@ bool Filter::loadCommand(QString command)
     return true;
 }
 
-string Filter::findWord(string com, size_t pos)
+std::string Filter::findWord(std::string com, size_t pos)
 {
-    size_t beg = com.find_first_not_of(string(" "), pos);
-    size_t end = com.find_first_of(string(" "), beg);
-    if (end >= com.size()) end = com.find_first_of(string("\n"), beg);
+    size_t beg = com.find_first_not_of(std::string(" "), pos);
+    size_t end = com.find_first_of(std::string(" "), beg);
+    if (end >= com.size()) end = com.find_first_of(std::string("\n"), beg);
 
     return com.substr(beg, end-beg);
+}
+
+bool Filter::launchOneFilter(SnifferData& snifferData)
+{
+    bool flag = true;
+    for(std::map<int, std::string>::iterator iQuery = query.begin(); iQuery!=query.end(); iQuery++) {
+        switch(iQuery->first) {
+        case(P):{
+            if (snifferData.strProto.toStdString().find(iQuery->second.data()) > snifferData.strProto.toStdString().length()) {
+                flag = false;
+            }
+            break;
+        }
+        case(S):{
+            std::string tmpSource = snifferData.strSIP.toStdString();
+            tmpSource = tmpSource.substr(0,tmpSource.find_first_of(':'));
+            if (iQuery->second.find(tmpSource.data()) !=0) {
+                flag = false;
+            }
+            break;
+        }
+        case(D):{
+            std::string tmpDes = snifferData.strDIP.toStdString();
+            tmpDes = tmpDes.substr(0,tmpDes.find_first_of(':'));
+            if (iQuery->second.find(tmpDes.data()) != 0) {
+                flag = false;
+            }
+            break;
+        }
+        case(SPORT):{
+            std::string tmpSPort = snifferData.strSIP.toStdString();
+            tmpSPort = tmpSPort.substr(tmpSPort.find_first_of(':'));
+            if(iQuery->second.find(tmpSPort.data()) != 0) {
+                flag = false;
+            }
+            break;
+        }
+        case(DPORT):{
+            std::string tmpDPort = snifferData.strDIP.toStdString();
+            tmpDPort = tmpDPort.substr(tmpDPort.find_first_of(':')+1);
+            LOG(tmpDPort.data());
+            if(iQuery->second.find(tmpDPort.data()) != 0) {
+                flag = false;
+            }
+            break;
+        }
+        case(C):{
+            std::string text = QString(snifferData.protoInfo.strSendInfo).toStdString();
+            if(text.find(iQuery->second) >= text.size()) {
+                flag = false;
+            }
+            break;
+        }
+        }
+        if (!flag) break;
+    }
+    return flag;
 }
 
 void Filter::launchFilter(MultiView *view)
@@ -68,58 +125,8 @@ void Filter::launchFilter(MultiView *view)
     bool flag;
     //filtrate every packet
     for(std::vector<SnifferData>::iterator iSnifferData = view->packets.begin(); iSnifferData<view->packets.end(); iSnifferData++) {
-        flag = true;
-        for(std::map<int, std::string>::iterator iQuery = query.begin(); iQuery!=query.end(); iQuery++) {
-            switch(iQuery->first) {
-            case(P):{
-                if (iSnifferData->strProto.toStdString().find(iQuery->second.data()) > iSnifferData->strProto.toStdString().length()) {
-                    flag = false;
-                }
-                break;
-            }
-            case(S):{
-                std::string tmpSource = iSnifferData->strSIP.toStdString();
-                tmpSource = tmpSource.substr(0,tmpSource.find_first_of(':'));
-                if (iQuery->second.find(tmpSource.data()) !=0) {
-                    flag = false;
-                }
-                break;
-            }
-            case(D):{
-                std::string tmpDes = iSnifferData->strDIP.toStdString();
-                tmpDes = tmpDes.substr(0,tmpDes.find_first_of(':'));
-                if (iQuery->second.find(tmpDes.data()) != 0) {
-                    flag = false;
-                }
-                break;
-            }
-            case(SPORT):{
-                std::string tmpSPort = iSnifferData->strSIP.toStdString();
-                tmpSPort = tmpSPort.substr(tmpSPort.find_first_of(':'));
-                if(iQuery->second.find(tmpSPort.data()) != 0) {
-                    flag = false;
-                }
-                break;
-            }
-            case(DPORT):{
-                std::string tmpDPort = iSnifferData->strDIP.toStdString();
-                tmpDPort = tmpDPort.substr(tmpDPort.find_first_of(':')+1);
-                LOG(tmpDPort.data());
-                if(iQuery->second.find(tmpDPort.data()) != 0) {
-                    flag = false;
-                }
-                break;
-            }
-            case(C):{
-                std::string text = QString(iSnifferData->protoInfo.strSendInfo).toStdString();
-                if(text.find(iQuery->second) >= text.size()) {
-                    flag = false;
-                }
-                break;
-            }
-            }
-            if (!flag) break;
-        }
+        flag = launchOneFilter(*iSnifferData);
+
         //add the item to TableView if packet matched
         if (flag) view->addPacketItem(*iSnifferData, false);
     }

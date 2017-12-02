@@ -59,7 +59,7 @@ void MainWindow::on_start_clicked()
 
         LOG("WRONG2");
 
-        pCaptureThread=new CaptureThread(sniffer, tmpFileName, view);
+        pCaptureThread=new CaptureThread(sniffer, tmpFileName, view, filter);
 
         //pCaptureThread->setCondition();
         pCaptureThread->start();

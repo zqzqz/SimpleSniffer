@@ -2,7 +2,7 @@
 #define NETWORKCHOICE_H
 
 #include <QDialog>
-#include "../src/sniffer.h"
+#include "sniffer.h"
 #include "ui_networkchoice.h"
 
 class NetworkChoice : public QDialog

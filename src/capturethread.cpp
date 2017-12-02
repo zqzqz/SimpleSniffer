@@ -12,12 +12,13 @@ CaptureThread::CaptureThread()
 
 }
 
-CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename, MultiView *view)
+CaptureThread::CaptureThread(Sniffer *psniffer, QString tmpfilename, MultiView *view, Filter *f)
 {
     bstop = false;
     sniffer = psniffer;
     filename = tmpfilename;
     this->view = view;
+    this->filter = f;
 }
 
 void CaptureThread::setCondition()
@@ -262,7 +263,7 @@ void CaptureThread::run()
 
             sprintf(sizeNum,"%d",num);
             tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet
-            view->addPacketItem(tmpSnifferData);
+            view->addPacketItem(tmpSnifferData, true, filter->launchOneFilter(tmpSnifferData));
             num++;
 
         }

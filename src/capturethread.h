@@ -2,8 +2,9 @@
 #define CAPTURETHREAD_H
 
 #include <QThread>
-#include "multiview.h"
 #include "type.h"
+#include "filter.h"
+
 class Sniffer;
 namespace Ui {
     class MainWindow;
@@ -14,7 +15,7 @@ class CaptureThread : public QThread
     Q_OBJECT
 public:
     CaptureThread();
-    CaptureThread(Sniffer *psniffer, QString filename, MultiView *view);
+    CaptureThread(Sniffer *psniffer, QString filename, MultiView *view, Filter *filter);
     void stop();
     void run();
     void setCondition();
@@ -24,6 +25,7 @@ private:
     Sniffer *sniffer;
     QString filename;
     MultiView *view;
+    Filter *filter;
 };
 
 #endif // CAPTURETHREAD_H

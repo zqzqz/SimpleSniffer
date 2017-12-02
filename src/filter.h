@@ -1,6 +1,6 @@
 #ifndef FILTER_H
 #define FILTER_H
-#include "mainwindow.h"
+
 #include "log.h"
 #include <string.h>
 #include <QTableView>
@@ -23,10 +23,10 @@ public:
     bool loadCommand(QString command);
     void launchFilter(MultiView* view);
     void printQuery(); //test
-
+    bool launchOneFilter(SnifferData &snifferData);
 private:
-    map<int, string> query;
-    string findWord(string com, size_t pos);
+    std::map<int, std::string> query;
+    std::string findWord(std::string com, size_t pos);
 
 };
 

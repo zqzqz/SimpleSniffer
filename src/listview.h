@@ -30,7 +30,7 @@ public:
     void rebuildInfo();
     bool isChanged();
 
-    void addPacketItem(SnifferData &data, bool fnew=true);
+    void addPacketItem(SnifferData &data, bool fnew=true, bool display=true);
 
     void getOrderNumber(QModelIndex &index, QString &strNumber);
 
