@@ -180,6 +180,12 @@ void MainWindow::on_filter_textChanged(const QString &command)
 
 void MainWindow::on_filter_returnPressed()
 {
+    if (ui->filter->text() == tr("-h")) {
+        QMessageBox::about(this, tr("About the Usage of Filter"), tr("[-options] [data to query]\n"
+                                                                     "-h help\n-p protocol\n-s sourceIP\n-d destinationIP /"
+                                                                 " -sport sourcePort\n-dport destinationPort\n-c packetContent"));
+        return;
+    }
     filter->loadCommand(ui->filter->text());
     filter->printQuery();
     filter->launchFilter(view);

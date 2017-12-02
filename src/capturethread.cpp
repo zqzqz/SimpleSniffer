@@ -152,6 +152,7 @@ void CaptureThread::run()
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) tcph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("TCP");
+                tmpSnifferData.strProto += "TCP";
 
                 tcpSeqNo=ntohs(tcph->seq_no);
                 tcpAckNo=ntohs(tcph->ack_no); //check later

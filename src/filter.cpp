@@ -19,7 +19,7 @@ Filter::~Filter()
 bool Filter::checkCommand(QString command)
 {
     //LOG(command.toLatin1().data());
-    std::string pattern{ "([ ]*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-c[ ]\\w+))[ ]+)*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-c[ ]\\w+))?" };
+    std::string pattern{ "(-h)|(([ ]*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-c[ ]\\S+))[ ]+)*((-p[ ]+[a-zA-Z]+)|((-s|-d)[ ]+\\d{1,3}.\\d{1,3}.\\d{1,3}.\\d{1,3})|((-sport|-dport)[ ]+\\d+)|(-c[ ]\\S+))?)" };
     std::regex re(pattern);
     return std::regex_match(command.toStdString(), re);
 }

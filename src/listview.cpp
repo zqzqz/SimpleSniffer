@@ -102,6 +102,23 @@ void ListView::addPacketItem(SnifferData &tmpSnifferData, bool fnew, bool displa
         mainModel->setItem(index, 4, item);
         item = new QStandardItem(QString(tmpSnifferData.strLength));
         mainModel->setItem(index, 5, item);
+
+        //set color according to protocols
+        QVariant qcolor;
+        QColor* color;
+        switch (tmpSnifferData.protoInfo.tcpFlag) {
+        case(TCP_SIG): color = new QColor(100,255,100);break;
+        case(UDP_SIG): color = new QColor(100,100,255);break;
+        case(ICMP_SIG): color = new QColor(255,100,100);break;
+        case(IGMP_SIG): color = new QColor(255,255,100);break;
+        default: color = new QColor(200,200,200);
+        }
+        qcolor = *color;
+        for (int i=0; i<6; i++) {
+            //how to make it easier :(
+            mainModel->setData(mainModel->index(index, i), qcolor, Qt::BackgroundRole);
+        }
+        delete color;
         index++;
     }
 
