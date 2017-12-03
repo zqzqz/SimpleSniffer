@@ -1,5 +1,5 @@
 #include "listview.h"
-
+#include <iostream>
 ListView::ListView(QTableView *v)
 {
     view = v;
@@ -42,6 +42,8 @@ ListView::~ListView()
 void ListView::clearData()
 {
     packets.clear();
+    status.clear();
+    fileFlow.clear();
     index = 0;
     rebuildInfo();
 }
@@ -123,6 +125,35 @@ void ListView::addPacketItem(SnifferData &tmpSnifferData, bool fnew, bool displa
     }
 
     if(fnew) packets.push_back(tmpSnifferData);
+}
+
+/*
+ * add a packet which may contain file data to record
+ *
+ */
+void ListView::addFilePacket(QString id, int seq, int index)
+{
+    std::vector< std::map<int, int> >::iterator miter;
+    std::vector<QString>::iterator iter = std::find(status.begin(), status.end(), id);
+    if (iter == status.end()) {
+        status.push_back(id);
+        std::map<int, int> newmap;
+        newmap.insert(std::make_pair(seq, index));
+        fileFlow.push_back(newmap);
+    }
+    else {
+        miter = fileFlow.begin() + (iter - status.begin());
+        (*miter).insert(std::make_pair(seq, index));
+    }
+}
+
+
+void ListView::loadByIndex(std::vector<int> &indexs)
+{
+    rebuildInfo();
+    for(std::vector<int>::iterator it = indexs.begin(); it != indexs.end(); it++) {
+        addPacketItem(packets.at(*it), false, true);
+    }
 }
 
 /*

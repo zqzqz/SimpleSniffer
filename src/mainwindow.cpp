@@ -5,12 +5,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    //init
     sniffer = new Sniffer();
+    view = new MultiView(ui->treeView, ui->textBrowser, ui->tableView);
+    filter = new Filter();
     currentFile = "default.pcap";
     netDevDialog = new NetworkChoice(sniffer, this);
+    fileDialog = new FileDialog(view, this);
     snifferStatus = false;
-    filter = new Filter();
-    view = new MultiView(ui->treeView, ui->textBrowser, ui->tableView);
+
+
     //view= new ListView(ui->tableView);
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(quit()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(save()));
@@ -237,5 +241,12 @@ void MainWindow::saveTree()
 
             file.close();
         }
+    }
+}
+
+void MainWindow::on_fileButton_clicked()
+{
+    fileDialog->prepare();
+    if (fileDialog->exec() == QDialog::Accepted) {
     }
 }

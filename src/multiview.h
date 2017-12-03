@@ -10,6 +10,8 @@
 #define MULTIVIEW_H
 
 #include "listview.h"
+#include <stdio.h>
+#include <netinet/in.h>
 #include <QTreeView>
 #include <QTextBrowser>
 #include <QString>
@@ -20,6 +22,7 @@ private:
     QStandardItemModel *treeModel;
     QTreeView *treeView;
     QTextBrowser *textBrowser;
+
     void reload();
     void setTreeViewByIndex(SnifferData SnifferData);
     void setHexViewByIndex(SnifferData SnifferData);

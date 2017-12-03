@@ -1,7 +1,8 @@
 #include "capturethread.h"
 #include "sniffer.h"
 #include <ctime>
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include"log.h"
 
 namespace Ui {
@@ -42,8 +43,8 @@ void CaptureThread::run()
     int res;//save the result of catth packet
 
     QByteArray      rawByteData;
-    int             num;
-    num=1;
+    int             num=1;
+    bool fileFlag; // whether the packet my contain file data
     char            sizeNum[10];
     char            sizeLength[6];
     time_t          local_tv_sec;
@@ -73,6 +74,7 @@ void CaptureThread::run()
     while (bstop!=true &&(res=sniffer->captureOnce())>=0) {
         //msleep(1);
         SnifferData tmpSnifferData;
+        fileFlag = false;
         tmpSnifferData.protoInfo.strSendInfo = QByteArray("");
         // out of time,wait for packet
         if(res==0) {
@@ -115,15 +117,15 @@ void CaptureThread::run()
         int flag;
         flag=0;
 
-        unsigned short sport,dport;
+        unsigned short sport=0,dport=0;
         unsigned char* sip;
         unsigned char* dip;
-        unsigned int ip_lenth,arp_lenth,arp_total_lenth;
-        unsigned int tcpSeqNo,tcpAckNo;
+        unsigned int ip_lenth;
 
         //First get Mac header
 
-        eth=(_eth_header*)sniffer->pktData;
+        eth=new _eth_header();
+        memcpy(eth, sniffer->pktData, sizeof(_eth_header));
         tmpSnifferData.protoInfo.peth = (void*) eth;
 
         //Second get ip header
@@ -135,7 +137,8 @@ void CaptureThread::run()
 
             flag=1;
 
-            iph=(_ip_header*)(sniffer->pktData+14);
+            iph=new _ip_header();
+            memcpy(iph, sniffer->pktData+14, sizeof(_ip_header));
             tmpSnifferData.protoInfo.ipFlag = EPT_IP;
             tmpSnifferData.protoInfo.pip = (void*) iph;
 
@@ -148,14 +151,12 @@ void CaptureThread::run()
 
             switch(iph->proto) {
             case TCP_SIG:
-                tcph=(_tcp_header *)((unsigned char *)iph+ip_lenth);
+                tcph=new _tcp_header();
+                memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) tcph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("TCP");
                 tmpSnifferData.strProto += "TCP";
-
-                tcpSeqNo=ntohs(tcph->seq_no);
-                tcpAckNo=ntohs(tcph->ack_no); //check later
 
                 sport=ntohs(tcph->sport);
                 dport=ntohs(tcph->dport);
@@ -182,9 +183,9 @@ void CaptureThread::run()
                          sport == HTTP2_PORT || dport == HTTP2_PORT) {
                     tmpSnifferData.strProto += "(HTTP)";
                     tmpSnifferData.protoInfo.appFlag = HTTP_PORT;
-                    tmpSnifferData.protoInfo.strSendInfo = rawByteData.remove(0, 54);
                 } else {
                     tmpSnifferData.protoInfo.appFlag = 0;
+                    fileFlag = true;
                 }
                 tmpSnifferData.protoInfo.strSendInfo = rawByteData.remove(0, 54);
                 break;
@@ -193,7 +194,8 @@ void CaptureThread::run()
                 tmpSnifferData.strProto="UDP";
                 tmpSnifferData.strProtoForShow="User Datagram Protocol";
 
-                udph=(_udp_header*)((unsigned char *)iph+ip_lenth);
+                udph=new _udp_header();
+                memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
                 tmpSnifferData.protoInfo.tcpFlag = UDP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) udph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("UDP");
@@ -215,7 +217,8 @@ void CaptureThread::run()
             case ICMP_SIG:
                 tmpSnifferData.strProto="ICMP";
 
-                icmph=(_icmp_header*)((unsigned char*)iph+ip_lenth);
+                icmph=new _icmp_header();
+                memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) icmph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("ICMP");
@@ -223,7 +226,8 @@ void CaptureThread::run()
             case IGMP_SIG:
                 tmpSnifferData.strProto="IGMP";
 
-                igmph=(_igmp_header *)((unsigned char *)iph+ip_lenth);
+                igmph=new _igmp_header();
+                memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = IGMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) igmph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("IGMP");
@@ -242,7 +246,8 @@ void CaptureThread::run()
 
             tmpSnifferData.strProto="ARP";
             //get arp protocol header
-            arph=(_arp_header *)(sniffer->pktData+14);
+            arph = new _arp_header();
+            memcpy(arph, (sniffer->pktData+14), sizeof(_arp_header));
             tmpSnifferData.protoInfo.ipFlag = EPT_ARP;
             tmpSnifferData.protoInfo.pip = (void*) arph;
 
@@ -260,7 +265,11 @@ void CaptureThread::run()
         tmpSnifferData.strSIP=tmpSnifferData.strSIP+":"+QString::number(sport,10);
         tmpSnifferData.strDIP=strdip;
         tmpSnifferData.strDIP=tmpSnifferData.strDIP+":"+QString::number(dport,10);
-        if(flag==1&&bstop==false) {
+
+        if (fileFlag && tmpSnifferData.protoInfo.strSendInfo.size()>100) {
+            view->addFilePacket(tmpSnifferData.strSIP+tmpSnifferData.strDIP, ntohs(tcph->seq_no), num-1);
+        }
+        if (flag==1&&bstop==false) {
 
             sprintf(sizeNum,"%d",num);
             tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet

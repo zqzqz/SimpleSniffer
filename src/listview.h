@@ -17,6 +17,7 @@
 #include <QByteArray>
 #include "type.h"
 #include <vector>
+#include <map>
 
 
 class ListView
@@ -31,15 +32,19 @@ public:
     bool isChanged();
 
     void addPacketItem(SnifferData &data, bool fnew=true, bool display=true);
-
+    void loadByIndex(std::vector<int> &indexs);
     void getOrderNumber(QModelIndex &index, QString &strNumber);
 
     void clearData();
+    void addFilePacket(QString id, int seq, int index);
 protected:
     friend class Filter;
+    friend class FileDialog;
     QStandardItemModel *mainModel;
     int index;
     std::vector<SnifferData> packets;
+    std::vector< QString > status;
+    std::vector< std::map<int, int> > fileFlow;
 };
 
 

@@ -38,17 +38,17 @@ bool Filter::loadCommand(QString command)
     std::string com = command.toStdString();
     std::size_t pos;
     pos = com.find("-p ");
-    if (pos<com.size()) query.insert(make_pair(P, findWord(com, pos+2)));
+    if (pos<com.size()) query.insert(std::make_pair(P, findWord(com, pos+2)));
     pos = com.find("-s ");
-    if (pos<com.size()) query.insert(make_pair(S, findWord(com, pos+2)));
+    if (pos<com.size()) query.insert(std::make_pair(S, findWord(com, pos+2)));
     pos = com.find("-d ");
-    if (pos<com.size()) query.insert(make_pair(D, findWord(com, pos+2)));
+    if (pos<com.size()) query.insert(std::make_pair(D, findWord(com, pos+2)));
     pos = com.find("-sport ");
-    if (pos<com.size()) query.insert(make_pair(SPORT, findWord(com, pos+6)));
+    if (pos<com.size()) query.insert(std::make_pair(SPORT, findWord(com, pos+6)));
     pos = com.find("-dport ");
-    if (pos<com.size()) query.insert(make_pair(DPORT, findWord(com, pos+6)));
+    if (pos<com.size()) query.insert(std::make_pair(DPORT, findWord(com, pos+6)));
     pos = com.find("-c ");
-    if (pos<com.size()) query.insert(make_pair(C, findWord(com, pos+2)));
+    if (pos<com.size()) query.insert(std::make_pair(C, findWord(com, pos+2)));
     return true;
 }
 

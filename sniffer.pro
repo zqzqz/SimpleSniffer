@@ -34,7 +34,8 @@ SOURCES += \
     src/capturethread.cpp \
     src/filter.cpp \
     src/listview.cpp \
-    src/multiview.cpp
+    src/multiview.cpp \
+    src/filedialog.cpp
 
 HEADERS += \
         src/mainwindow.h \
@@ -46,11 +47,13 @@ HEADERS += \
     src/capturethread.h \
     src/filter.h \
     src/listview.h \
-    src/multiview.h
+    src/multiview.h \
+    src/filedialog.h
 
 FORMS += \
         ui/mainwindow.ui \
-    ui/networkchoice.ui
+    ui/networkchoice.ui \
+    ui/filedialog.ui
 
 RESOURCES += sniffer.qrc \
     sniffer.qrc

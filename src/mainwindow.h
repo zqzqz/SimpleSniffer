@@ -11,6 +11,7 @@
 #include "filter.h"
 #include "ui_mainwindow.h"
 #include "networkchoice.h"
+#include "filedialog.h"
 #include "log.h"
 #include <unistd.h>
 #include <QTreeWidgetItem>
@@ -57,11 +58,14 @@ private slots:
 
     void on_treeView_customContextMenuRequested(const QPoint &pos);
 
+    void on_fileButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     Sniffer *sniffer;
     QString currentFile;
     NetworkChoice *netDevDialog;
+    FileDialog *fileDialog;
     CaptureThread *captureThread;
     Filter *filter;
     bool snifferStatus; //true for running; false for stopped;

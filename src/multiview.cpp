@@ -1,7 +1,4 @@
 #include "multiview.h"
-#include <iostream>
-#include <stdio.h>
-#include <netinet/in.h>
 #include "log.h"
 
 MultiView::~MultiView()
@@ -108,13 +105,13 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         itemSub = new QStandardItem(QObject::tr("Flags"));
         item->appendRow(itemSub);
         //treeView->setExpanded(itemSub->index(), true);
-        itemChild = new QStandardItem(QObject::tr("Reserved Bit: ")+QString::number((iph->flags_fo & 0x8000)/128/256, 10));
+        itemChild = new QStandardItem(QObject::tr("Reserved Bit: ")+QString::number((ntohs(iph->flags_fo) & 0x8000)/128/256, 10));
         itemSub->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Don't Fragment: ")+QString::number((iph->flags_fo & 0x4000)/64/256, 10));
+        itemChild = new QStandardItem(QObject::tr("Don't Fragment: ")+QString::number((ntohs(iph->flags_fo) & 0x4000)/64/256, 10));
         itemSub->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("More Fragment: ")+QString::number((iph->flags_fo & 0x2000)/32/256, 10));
+        itemChild = new QStandardItem(QObject::tr("More Fragment: ")+QString::number((ntohs(iph->flags_fo) & 0x2000)/32/256, 10));
         itemSub->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Fragment Offset: ")+QString::number((iph->flags_fo & 0x1FFF), 10));
+        itemChild = new QStandardItem(QObject::tr("Fragment Offset: ")+QString::number((ntohs(iph->flags_fo) & 0x1FFF), 10));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Time to Live: ")+QString::number(ntohs(iph->ttl), 10));
         item->appendRow(itemChild);
@@ -137,11 +134,11 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Protocol Type: ")+QObject::tr("IPV4 (0x0800)")); //fake
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Hardware Size: ")+QString::number(arph->arp_hln, 10));
+        itemChild = new QStandardItem(QObject::tr("Hardware Size: ")+QString::number(ntohs(arph->arp_hln), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Protocol Size: ")+QString::number(arph->arp_pln, 10));
+        itemChild = new QStandardItem(QObject::tr("Protocol Size: ")+QString::number(ntohs(arph->arp_pln), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Opcode: ")+ ((htons(arph->arp_op)==0x0001)? QObject::tr("Request (1)"):QObject::tr("Reply (2)") ) );
+        itemChild = new QStandardItem(QObject::tr("Opcode: ")+ (((arph->arp_op)==0x0001)? QObject::tr("Request (1)"):QObject::tr("Reply (2)") ) );
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Sender MAC Address: ")+smac);
         item->appendRow(itemChild);
@@ -165,22 +162,22 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         //treeView->setExpanded(index, true);
 
         _tcp_header* tcph = (_tcp_header*) snifferData.protoInfo.ptcp;
-        itemChild = new QStandardItem(QObject::tr("Source Port: ")+QString::number(htons(tcph->sport), 10));
+        itemChild = new QStandardItem(QObject::tr("Source Port: ")+QString::number(ntohs(tcph->sport), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Destination Port: ")+QString::number(htons(tcph->dport), 10));
+        itemChild = new QStandardItem(QObject::tr("Destination Port: ")+QString::number(ntohs(tcph->dport), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Sequence Number: ")+QString::number(htons(tcph->seq_no), 10));
+        itemChild = new QStandardItem(QObject::tr("Sequence Number: ")+QString::number(ntohs(tcph->seq_no), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Acknowledgment Number: ")+QString::number(htons(tcph->ack_no), 10));
+        itemChild = new QStandardItem(QObject::tr("Acknowledgment Number: ")+QString::number(ntohs(tcph->ack_no), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Header Length: ")+QString::number(htons(tcph->thl)*4, 10));
+        itemChild = new QStandardItem(QObject::tr("Header Length: ")+QString::number((tcph->thl & 0xF0)/4, 10));
         item->appendRow(itemChild);
         itemSub = new QStandardItem(QObject::tr("Flags"));
         item->appendRow(itemSub);
-        //treeView->setExpanded(itemSub->index(), true);
-        itemChild = new QStandardItem(QObject::tr("Reserved: ")+QString::number((tcph->flag)>>9, 10));
+        treeView->setExpanded(itemSub->index(), true);
+        itemChild = new QStandardItem(QObject::tr("Reserved: ")+QString::number((tcph->thl & 0x0E)/2, 10));
         itemSub->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Nonce: ")+QString::number((tcph->flag & 0x100)/256, 10));
+        itemChild = new QStandardItem(QObject::tr("Nonce: ")+QString::number((tcph->thl & 0x01), 10));
         itemSub->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("CWR: ")+QString::number((tcph->flag & 0x80)/128, 10));
         itemSub->appendRow(itemChild);
@@ -198,9 +195,9 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         itemSub->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Fin: ")+QString::number((tcph->flag & 0x1), 10));
         itemSub->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Header Length: ")+QString::number(tcph->wnd_size, 10));
+        itemChild = new QStandardItem(QObject::tr("Win Size: ")+QString::number(ntohs(tcph->wnd_size), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(tcph->chk_sum, 16));
+        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(ntohs(tcph->chk_sum), 16));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Urgent Pointer: ")+QString::number(tcph->urgt_p, 10));
         item->appendRow(itemChild);
@@ -216,13 +213,13 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         //treeView->setExpanded(index, true);
 
         _udp_header* udph = (_udp_header*) snifferData.protoInfo.ptcp;
-        itemChild = new QStandardItem(QObject::tr("Source Port: ")+QString::number(htons(udph->sport), 10));
+        itemChild = new QStandardItem(QObject::tr("Source Port: ")+QString::number(ntohs(udph->sport), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Destination Port: ")+QString::number(htons(udph->dport), 10));
+        itemChild = new QStandardItem(QObject::tr("Destination Port: ")+QString::number(ntohs(udph->dport), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Length: ")+QString::number(htons(udph->len), 10));
+        itemChild = new QStandardItem(QObject::tr("Length: ")+QString::number(ntohs(udph->len), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(udph->crc, 16));
+        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(ntohs(udph->crc), 16));
         item->appendRow(itemChild);
         break;
     }
@@ -281,7 +278,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Code: ")+QString::number(icmph->code, 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(icmph->crc, 16));
+        itemChild = new QStandardItem(QObject::tr("Checksum: 0x")+QString::number(ntohs(icmph->crc), 16));
         item->appendRow(itemChild);
         break;
     }
@@ -302,9 +299,9 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
             itemChild = new QStandardItem(QObject::tr("Type: Membership Query (0x11)"));
             item->appendRow(itemChild);
         }
-        itemChild = new QStandardItem(QObject::tr("Max Response Code: ") + QString::number(htons(igmph->maxRespCode), 10));
+        itemChild = new QStandardItem(QObject::tr("Max Response Code: ") + QString::number((igmph->maxRespCode), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Checksum: ") + QString::number(igmph->crc, 16));
+        itemChild = new QStandardItem(QObject::tr("Checksum: ") + QString::number(ntohs(igmph->crc), 16));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Num Group Record: ") + QString::number(igmph->numberOfGroupSrc));
         item->appendRow(itemChild);
@@ -343,12 +340,13 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
     case(HTTP_PORT): appPro = QObject::tr("HTTP (Hyper Text Transport Protocol)");break;
     case(DNS_PORT): appPro = QObject::tr("DNS (Domain Name Server)");break;
     case(SNMP_PORT): appPro = QObject::tr("SNMP (Simple Network Management Protocol)");break;
+    default: appPro = QObject::tr("TCP payload");
     }
     item = new QStandardItem(appPro);
     treeModel->setItem(3, item);
     index = treeModel->item(3)->index();
     //treeView->setExpanded(index, true);
-    itemChild = new QStandardItem(QObject::tr("Data: ") + QString(snifferData.protoInfo.strSendInfo));
+    itemChild = new QStandardItem(QObject::tr("Data: ") + QString(snifferData.protoInfo.strSendInfo.toHex()));
     item->appendRow(itemChild);
 }
 

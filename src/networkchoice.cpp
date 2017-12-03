@@ -1,6 +1,4 @@
 #include "networkchoice.h"
-#include "ui_networkchoice.h"
-#include "sniffer.h"
 #include <QComboBox>
 #include <QWidget>
 #include "log.h"
