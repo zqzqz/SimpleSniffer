@@ -21,10 +21,11 @@ Please do not push sniffer.pro.user anymore. Conflicts will happen.
       * Packets 
 
 ## Current tasks
-* waiting for ultimate tree structure to implement new features
 * IP slides reunited (undo)
-* analyse file type which packets transmit (undo)
-* search and filtrate packets by protocal content (soon)
+* analyse file type which packets transmit (untested)
+  * I tested a png transmitted by one packet and a jpg transmitted by two packets.
+  * But I am not sure whether it really works... The type conversions are confusing...
+* search and filtrate packets by protocal content (done)
 * clicked right mouse on TreeView can save current packet info to file (finished)
 * analyse packets upon different protocols 
   * implement code in capturethread.cpp: run
