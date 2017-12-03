@@ -131,13 +131,13 @@ void ListView::addPacketItem(SnifferData &tmpSnifferData, bool fnew, bool displa
  * add a packet which may contain file data to record
  *
  */
-void ListView::addFilePacket(QString id, int seq, int index)
+void ListView::addFilePacket(QString id, unsigned int seq, int index)
 {
-    std::vector< std::map<int, int> >::iterator miter;
+    std::vector< std::map<unsigned int, int> >::iterator miter;
     std::vector<QString>::iterator iter = std::find(status.begin(), status.end(), id);
     if (iter == status.end()) {
         status.push_back(id);
-        std::map<int, int> newmap;
+        std::map<unsigned int, int> newmap;
         newmap.insert(std::make_pair(seq, index));
         fileFlow.push_back(newmap);
     }

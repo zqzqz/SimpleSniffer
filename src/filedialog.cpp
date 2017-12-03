@@ -1,5 +1,6 @@
 #include "filedialog.h"
 #include <QFileDialog>
+#include "log.h"
 
 FileDialog::FileDialog(MultiView *v, QWidget *parent): QDialog(parent), ui(new Ui::FileDialog), view(v)
 {
@@ -46,11 +47,11 @@ void FileDialog::prepare()
 void FileDialog::filtrateFile()
 {
     int id = 0;
-    for (std::vector< std::map<int, int> >::iterator it = view->fileFlow.begin(); it<view->fileFlow.end(); it++) {
+    for (std::vector< std::map<unsigned int, int> >::iterator it = view->fileFlow.begin(); it<view->fileFlow.end(); it++) {
         // find the smallest seq as start
-        std::map<int, int>::iterator mit = it->end(); mit--;
+        std::map<unsigned int, int>::iterator mit = it->begin();
         QString name;
-        int seq = mit->first;
+        unsigned int seq = mit->first;
         int index = mit->second;
         SnifferData snifferData = view->packets.at(index);
         QByteArray payload = snifferData.protoInfo.strSendInfo;
@@ -62,6 +63,9 @@ void FileDialog::filtrateFile()
         else if (payload.indexOf(QByteArray::fromHex("d0cf11e0a1b11ae1")) ==0) {
             name = QString::number(id, 10) + tr(":doc"); //test a doc file
         }
+        else if (payload.indexOf(QByteArray::fromHex("ffd8ff")) ==0) {
+            name = QString::number(id, 10) + tr(":jpg"); //test a jpg file
+        }
         else {
             continue;
         }
@@ -72,7 +76,10 @@ void FileDialog::filtrateFile()
             //calculate next seq
             _ip_header* iph = (_ip_header*) snifferData.protoInfo.pip;
             _tcp_header* tcph = (_tcp_header*) snifferData.protoInfo.ptcp;
-            seq += (ntohs(iph->tlen) - ntohs(iph->ver_ihl & 0x0F)*4 - ntohs(tcph->thl)*4);
+            unsigned int a=ntohs(iph->tlen);
+            unsigned int b=ntohs(iph->ver_ihl & 0x0F);
+            uint16_t c=ntohs(tcph->thl & 0xF0)/16;
+            seq += (unsigned int)((ntohs(iph->tlen) - ntohs(iph->ver_ihl & 0x0F)/64- ntohs(tcph->thl & 0xF0)/16/64));
             //find next packet by seq
             mit = it->find(seq);
             if (mit == it->end()) break; //end
@@ -81,6 +88,7 @@ void FileDialog::filtrateFile()
                 indexs.push_back(index);
             }
         }
+        id++;
         files.insert(std::make_pair(name, indexs));
     }
 }

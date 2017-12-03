@@ -36,7 +36,7 @@ public:
     void getOrderNumber(QModelIndex &index, QString &strNumber);
 
     void clearData();
-    void addFilePacket(QString id, int seq, int index);
+    void addFilePacket(QString id, unsigned int seq, int index);
 protected:
     friend class Filter;
     friend class FileDialog;
@@ -44,7 +44,7 @@ protected:
     int index;
     std::vector<SnifferData> packets;
     std::vector< QString > status;
-    std::vector< std::map<int, int> > fileFlow;
+    std::vector< std::map<unsigned int, int> > fileFlow;
 };
 
 
