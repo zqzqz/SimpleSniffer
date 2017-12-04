@@ -121,6 +121,45 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Destination: ")+dip);
         item->appendRow(itemChild);
+        unsigned short ipOptionData;
+        ipOptionData=iph->optionData;
+        QString ipOptionDataType;
+        if(((iph->ver_ihl & 0x0F)*4)>20) {
+
+            switch (ipOptionData) {
+            case 0:
+                ipOptionDataType="选项表结束";
+                break;
+            case 1:
+                ipOptionDataType="无操作";
+                break;
+            case 130:
+                ipOptionDataType="安全选项";
+                break;
+            case 131:
+                ipOptionDataType="松散源路由选择和记录路由";
+                break;
+            case 137:
+                ipOptionDataType="严格源路由选择和记录路由";
+                break;
+            case 7:
+                ipOptionDataType="记录路由";
+                break;
+            case 136:
+                ipOptionDataType="流标记";
+                break;
+            case 68:
+                ipOptionDataType="时间戳";
+                break;
+            default:
+                ipOptionDataType=" ";
+                break;
+            }
+        } else {
+            ipOptionDataType="无选项";
+        }
+        itemChild = new QStandardItem(QObject::tr("Option Data: ")+ipOptionData);
+        item->appendRow(itemChild);
         break;
     }
     case(EPT_ARP): {
@@ -298,7 +337,15 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         else {
             itemChild = new QStandardItem(QObject::tr("Type: Membership Query (0x11)"));
             item->appendRow(itemChild);
+            itemChild = new QStandardItem(QObject::tr("Max Response Code: ") + QString::number((igmph->maxRespCode), 10));
+            item->appendRow(itemChild);
+            itemChild = new QStandardItem(QObject::tr("Checksum: ") + QString::number(ntohs(igmph->crc), 16));
+            item->appendRow(itemChild);
+            sprintf(ip, "%d.%d.%d.%d", igmph->groupAddress[0], igmph->groupAddress[1], igmph->groupAddress[2], igmph->groupAddress[3]);
+            itemChild = new QStandardItem(QObject::tr("Multicast Address: ") + QString(QLatin1String(ip)));
+            item->appendRow(itemChild);
         }
+        /*
         itemChild = new QStandardItem(QObject::tr("Max Response Code: ") + QString::number((igmph->maxRespCode), 10));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Checksum: ") + QString::number(ntohs(igmph->crc), 16));
@@ -324,6 +371,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         sprintf(ip, "%d.%d.%d.%d", igmph->groupAddress[0], igmph->groupAddress[1], igmph->groupAddress[2], igmph->groupAddress[3]);
         itemChild = new QStandardItem(QObject::tr("Multicast Address: ") + QString(QLatin1String(ip)));
         itemSub->appendRow(itemChild);
+        */
         break;
     }
     default: return;
