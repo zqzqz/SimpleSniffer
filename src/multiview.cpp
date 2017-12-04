@@ -166,9 +166,9 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Destination Port: ")+QString::number(ntohs(tcph->dport), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Sequence Number: ")+QString::number((ntohs(*((uint16_t*)tcph+2)))*65536+(ntohs(*((uint16_t*)tcph+3))), 10));
+        itemChild = new QStandardItem(QObject::tr("Sequence Number: ")+QString::number(ntohl(tcph->seq_no), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Acknowledgment Number: ")+QString::number((ntohs(*((uint16_t*)tcph+3)))*65536+(ntohs(*((uint16_t*)tcph+6))), 10));
+        itemChild = new QStandardItem(QObject::tr("Acknowledgment Number: ")+QString::number(ntohl(tcph->ack_no), 10));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Header Length: ")+QString::number((tcph->thl & 0xF0)/4, 10));
         item->appendRow(itemChild);

@@ -267,7 +267,7 @@ void CaptureThread::run()
         tmpSnifferData.strDIP=tmpSnifferData.strDIP+":"+QString::number(dport,10);
 
         if (fileFlag && tmpSnifferData.protoInfo.strSendInfo.size()>100) {
-            view->addFilePacket(tmpSnifferData.strSIP+tmpSnifferData.strDIP, (ntohs(*((uint16_t*)tcph+2)))*65536+(ntohs(*((uint16_t*)tcph+3))), num-1);
+            view->addFilePacket(tmpSnifferData.strSIP+tmpSnifferData.strDIP, ntohl(tcph->seq_no), num-1);
         }
         if (flag==1&&bstop==false) {
 
