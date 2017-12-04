@@ -175,4 +175,21 @@ struct SnifferData
     AnalyseProtoType	protoInfo;		// 树形显示结果的数据结构
 };
 
+struct SlidePacketInfo
+{
+    int             fragmentIdentification;
+    int             nextFragmentOffset;
+    bool            fragmentFlag;
+    unsigned short fragmentOffset;
+    QByteArray     fragmentByteData;
+};
+
+
+
+struct slideSort
+{
+  int index;
+  int sortOffset;
+};
+
 #endif	// TYPE_H_

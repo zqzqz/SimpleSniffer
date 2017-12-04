@@ -71,6 +71,8 @@ void CaptureThread::run()
         }
     }
 
+    pslideInfo=new SlideInfo;
+
     while (bstop!=true &&(res=sniffer->captureOnce())>=0) {
         //msleep(1);
         SnifferData tmpSnifferData;
@@ -130,7 +132,7 @@ void CaptureThread::run()
 
         //Second get ip header
 
-       /***************IP begin****************************************/
+/********************************************IP begin****************************************/
        if(htons(eth->eth_type)==2048) {     //there is somthing wrong about this sentence
 
             LOG("it is IP packet");
@@ -148,11 +150,27 @@ void CaptureThread::run()
             dip = iph->daddr;
 
             //above:finished processing ip header
+/**************************************ip slide and rebuild*************************************/
+            if(!pslideInfo->checkWhetherSlide(iph)) {
+                //pass,don't fragment
+            } else {
+                if(pslideInfo->complete) {
+                    //pass
+                } else {
+                    continue;
+                }
+            }
 
+/**************************************higher protocol on ip************************************/
             switch(iph->proto) {
             case TCP_SIG:
                 tcph=new _tcp_header();
-                memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
+                if(!pslideInfo->complete) {
+                    memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
+                } else {
+                    memcpy(tcph, &pslideInfo->rebuildByteData, sizeof(_tcp_header));
+                }
+                //memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) tcph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("TCP");
@@ -160,7 +178,6 @@ void CaptureThread::run()
 
                 sport=ntohs(tcph->sport);
                 dport=ntohs(tcph->dport);
-
 
 
 /**************************************tcp high protocol begin**********************************/
@@ -195,7 +212,12 @@ void CaptureThread::run()
                 tmpSnifferData.strProtoForShow="User Datagram Protocol";
 
                 udph=new _udp_header();
-                memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
+                if(!pslideInfo->complete) {
+                    memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
+                } else {
+                    memcpy(udph, &pslideInfo->rebuildByteData, sizeof(_udp_header));
+                }
+                //memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
                 tmpSnifferData.protoInfo.tcpFlag = UDP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) udph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("UDP");
@@ -218,7 +240,12 @@ void CaptureThread::run()
                 tmpSnifferData.strProto="ICMP";
 
                 icmph=new _icmp_header();
-                memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
+                if(!pslideInfo->complete) {
+                    memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
+                } else {
+                    memcpy(icmph, & pslideInfo->rebuildByteData, sizeof(_icmp_header));
+                }
+                //memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) icmph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("ICMP");
@@ -227,6 +254,11 @@ void CaptureThread::run()
                 tmpSnifferData.strProto="IGMP";
 
                 igmph=new _igmp_header();
+                if(!pslideInfo->complete) {
+                    memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
+                } else {
+                    memcpy(igmph, & pslideInfo->rebuildByteData, sizeof(_igmp_header));
+                }
                 memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = IGMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) igmph;
@@ -279,4 +311,5 @@ void CaptureThread::run()
         }
 
     }
+    delete pslideInfo;
 }

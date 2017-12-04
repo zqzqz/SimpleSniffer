@@ -35,7 +35,8 @@ SOURCES += \
     src/filter.cpp \
     src/listview.cpp \
     src/multiview.cpp \
-    src/filedialog.cpp
+    src/filedialog.cpp \
+    src/slideinfo.cpp
 
 HEADERS += \
         src/mainwindow.h \
@@ -48,7 +49,8 @@ HEADERS += \
     src/filter.h \
     src/listview.h \
     src/multiview.h \
-    src/filedialog.h
+    src/filedialog.h \
+    src/slideinfo.h
 
 FORMS += \
         ui/mainwindow.ui \

@@ -4,6 +4,7 @@
 #include <QThread>
 #include "type.h"
 #include "filter.h"
+#include "slideinfo.h"
 
 class Sniffer;
 namespace Ui {
@@ -26,6 +27,7 @@ private:
     QString filename;
     MultiView *view;
     Filter *filter;
+    SlideInfo *pslideInfo;
 };
 
 #endif // CAPTURETHREAD_H
