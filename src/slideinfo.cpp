@@ -26,7 +26,12 @@ bool SlideInfo::insertPacket(SlidePacketInfo & tmpslide) {
     } else {
         allIpId.push_back(tmpslide.fragmentIdentification);
     }
-    packetInfoForRebuild.push_back(tmpslide);
+    std::vector<SlidePacketInfo>::iterator its;
+    its=find(packetInfoForRebuild.begin(),packetInfoForRebuild.end(),tmpslide);
+    if(its!=packetInfoForRebuild.end()) {
+        packetInfoForRebuild.push_back(tmpslide);
+    }  //discard repetitive packets
+    //packetInfoForRebuild.push_back(tmpslide);
     return true;
 }
 

@@ -62,8 +62,8 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
     DMac=DMac.toHex().toUpper();
     SMac=SMac.toHex().toUpper();
     QString smac,dmac;
-    smac += SMac[0]+SMac[1]+QObject::tr("-")+SMac[2]+SMac[3]+QObject::tr("-")+SMac[4]+SMac[5]+QObject::tr("-")+SMac[6]+SMac[7]+QObject::tr("-")+SMac[8]+SMac[9]+QObject::tr("-")+SMac[10]+SMac[11];
-    dmac += DMac[0]+DMac[1]+QObject::tr("-")+DMac[2]+DMac[3]+QObject::tr("-")+DMac[4]+DMac[5]+QObject::tr("-")+DMac[6]+DMac[7]+QObject::tr("-")+DMac[8]+DMac[9]+QObject::tr("-")+DMac[10]+DMac[11];
+    smac =QObject::tr("")+SMac[0]+SMac[1]+QObject::tr("-")+SMac[2]+SMac[3]+QObject::tr("-")+SMac[4]+SMac[5]+QObject::tr("-")+SMac[6]+SMac[7]+QObject::tr("-")+SMac[8]+SMac[9]+QObject::tr("-")+SMac[10]+SMac[11];
+    dmac =QObject::tr("")+DMac[0]+DMac[1]+QObject::tr("-")+DMac[2]+DMac[3]+QObject::tr("-")+DMac[4]+DMac[5]+QObject::tr("-")+DMac[6]+DMac[7]+QObject::tr("-")+DMac[8]+DMac[9]+QObject::tr("-")+DMac[10]+DMac[11];
 
     itemChild = new QStandardItem(QObject::tr("Destination: ")+dmac);
     item->appendRow(itemChild);
@@ -180,8 +180,8 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         arpSMac.setRawData((const char *)arph->arp_sha,6);
         arpDMac=arpDMac.toHex().toUpper();
         arpSMac=arpSMac.toHex().toUpper();
-        QString arpsmac = arpSMac[0]+arpSMac[1]+QObject::tr("-")+arpSMac[2]+arpSMac[3]+QObject::tr("-")+arpSMac[4]+arpSMac[5]+QObject::tr("-")+arpSMac[6]+arpSMac[7]+QObject::tr("-")+arpSMac[8]+arpSMac[9]+QObject::tr("-")+arpSMac[10]+arpSMac[11];
-        QString arpdmac = arpDMac[0]+arpDMac[1]+QObject::tr("-")+arpDMac[2]+arpDMac[3]+QObject::tr("-")+arpDMac[4]+arpDMac[5]+QObject::tr("-")+arpDMac[6]+arpDMac[7]+QObject::tr("-")+arpDMac[8]+arpDMac[9]+QObject::tr("-")+arpDMac[10]+arpDMac[11];
+        QString arpsmac =QObject::tr("")+arpSMac[0]+arpSMac[1]+QObject::tr("-")+arpSMac[2]+arpSMac[3]+QObject::tr("-")+arpSMac[4]+arpSMac[5]+QObject::tr("-")+arpSMac[6]+arpSMac[7]+QObject::tr("-")+arpSMac[8]+arpSMac[9]+QObject::tr("-")+arpSMac[10]+arpSMac[11];
+        QString arpdmac =QObject::tr("")+arpDMac[0]+arpDMac[1]+QObject::tr("-")+arpDMac[2]+arpDMac[3]+QObject::tr("-")+arpDMac[4]+arpDMac[5]+QObject::tr("-")+arpDMac[6]+arpDMac[7]+QObject::tr("-")+arpDMac[8]+arpDMac[9]+QObject::tr("-")+arpDMac[10]+arpDMac[11];
 
 
 

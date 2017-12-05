@@ -124,6 +124,8 @@ void CaptureThread::run()
         unsigned char* sip;
         unsigned char* dip;
         unsigned int ip_lenth;
+        //QString  rebuildInfo;
+        //rebuildInfo="";
 
         //First get Mac header
 
