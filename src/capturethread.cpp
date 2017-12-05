@@ -92,7 +92,8 @@ void CaptureThread::run()
         rawByteData.clear();
         rawByteData.setRawData((const char*)sniffer->pktData,sniffer->header->caplen);  //save packet to qbytearray
 
-        tmpSnifferData.strData="raw capture data:" +rawByteData.toHex().toUpper();
+        tmpSnifferData.strData="raw capture data:" ;//+rawByteData.toHex().toUpper();
+        tmpSnifferData.strData.append(rawByteData.toHex().toUpper());
 
         local_tv_sec=sniffer->header->ts.tv_sec;  //seconds since 1900
         ltime=localtime(&local_tv_sec); //get local time
@@ -156,8 +157,9 @@ void CaptureThread::run()
             } else {
                 if(pslideInfo->complete) {
                     iph->flags_fo=0x0000;//pass
+                    tmpSnifferData.strProto+="(Rebuild)";
                 } else {
-                    continue;
+                    continue; //can't form an intact ip packet
                 }
             }
 

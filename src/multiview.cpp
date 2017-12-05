@@ -56,12 +56,14 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
     _eth_header* peth = (_eth_header*)snifferData.protoInfo.peth;
 
     QByteArray DMac,SMac;
+    DMac.clear();SMac.clear();
     DMac.setRawData((const char *)peth->dstmac,6);
     SMac.setRawData((const char *)peth->srcmac,6);
     DMac=DMac.toHex().toUpper();
     SMac=SMac.toHex().toUpper();
-    QString smac = SMac[0]+SMac[1]+QObject::tr("-")+SMac[2]+SMac[3]+QObject::tr("-")+SMac[4]+SMac[5]+QObject::tr("-")+SMac[6]+SMac[7]+QObject::tr("-")+SMac[8]+SMac[9]+QObject::tr("-")+SMac[10]+SMac[11];
-    QString dmac = DMac[0]+DMac[1]+QObject::tr("-")+DMac[2]+DMac[3]+QObject::tr("-")+DMac[4]+DMac[5]+QObject::tr("-")+DMac[6]+DMac[7]+QObject::tr("-")+DMac[8]+DMac[9]+QObject::tr("-")+DMac[10]+DMac[11];
+    QString smac,dmac;
+    smac += SMac[0]+SMac[1]+QObject::tr("-")+SMac[2]+SMac[3]+QObject::tr("-")+SMac[4]+SMac[5]+QObject::tr("-")+SMac[6]+SMac[7]+QObject::tr("-")+SMac[8]+SMac[9]+QObject::tr("-")+SMac[10]+SMac[11];
+    dmac += DMac[0]+DMac[1]+QObject::tr("-")+DMac[2]+DMac[3]+QObject::tr("-")+DMac[4]+DMac[5]+QObject::tr("-")+DMac[6]+DMac[7]+QObject::tr("-")+DMac[8]+DMac[9]+QObject::tr("-")+DMac[10]+DMac[11];
 
     itemChild = new QStandardItem(QObject::tr("Destination: ")+dmac);
     item->appendRow(itemChild);
@@ -128,35 +130,35 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
 
             switch (ipOptionData) {
             case 0:
-                ipOptionDataType="选项表结束";
+                ipOptionDataType="End of Option List";
                 break;
             case 1:
-                ipOptionDataType="无操作";
+                ipOptionDataType="No Operation";
                 break;
             case 130:
-                ipOptionDataType="安全选项";
+                ipOptionDataType="Security";
                 break;
             case 131:
-                ipOptionDataType="松散源路由选择和记录路由";
+                ipOptionDataType="Loose Source and Record Route";
                 break;
             case 137:
-                ipOptionDataType="严格源路由选择和记录路由";
+                ipOptionDataType="Strict Source and Record Route";
                 break;
             case 7:
-                ipOptionDataType="记录路由";
+                ipOptionDataType="Record Route";
                 break;
             case 136:
-                ipOptionDataType="流标记";
+                ipOptionDataType="Stream Identifier";
                 break;
             case 68:
-                ipOptionDataType="时间戳";
+                ipOptionDataType="Internet Timestamp";
                 break;
             default:
-                ipOptionDataType=" ";
+                ipOptionDataType="Unknow Option";
                 break;
             }
         } else {
-            ipOptionDataType="无选项";
+            ipOptionDataType="No Option";
         }
         itemChild = new QStandardItem(QObject::tr("Option Data: ")+ipOptionData);
         item->appendRow(itemChild);
@@ -166,9 +168,23 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item = new QStandardItem(QObject::tr("Address Resolution Protocol"));
         treeModel->setItem(1, item);
         index = treeModel->item(1)->index();
+
         //treeView->setExpanded(index, true);
 
         _arp_header* arph = (_arp_header*) snifferData.protoInfo.pip;
+
+
+        QByteArray arpDMac,arpSMac;
+        arpDMac.clear();arpSMac.clear();
+        arpDMac.setRawData((const char *)arph->arp_tha,6);
+        arpSMac.setRawData((const char *)arph->arp_sha,6);
+        arpDMac=arpDMac.toHex().toUpper();
+        arpSMac=arpSMac.toHex().toUpper();
+        QString arpsmac = arpSMac[0]+arpSMac[1]+QObject::tr("-")+arpSMac[2]+arpSMac[3]+QObject::tr("-")+arpSMac[4]+arpSMac[5]+QObject::tr("-")+arpSMac[6]+arpSMac[7]+QObject::tr("-")+arpSMac[8]+arpSMac[9]+QObject::tr("-")+arpSMac[10]+arpSMac[11];
+        QString arpdmac = arpDMac[0]+arpDMac[1]+QObject::tr("-")+arpDMac[2]+arpDMac[3]+QObject::tr("-")+arpDMac[4]+arpDMac[5]+QObject::tr("-")+arpDMac[6]+arpDMac[7]+QObject::tr("-")+arpDMac[8]+arpDMac[9]+QObject::tr("-")+arpDMac[10]+arpDMac[11];
+
+
+
         itemChild = new QStandardItem(QObject::tr("Hardware Type: ")+QObject::tr("Ethernet (1)")); //fake
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Protocol Type: ")+QObject::tr("IPV4 (0x0800)")); //fake
@@ -177,13 +193,13 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Protocol Size: ")+QString::number((arph->arp_pln), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Opcode: ")+ (((arph->arp_op)==0x0001)? QObject::tr("Request (1)"):QObject::tr("Reply (2)") ) );
+        itemChild = new QStandardItem(QObject::tr("Opcode: ")+ ((htons(arph->arp_op)==0x0001)? QObject::tr("Request (1)"):QObject::tr("Reply (2)") ) );
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Sender MAC Address: ")+smac);
+        itemChild = new QStandardItem(QObject::tr("Sender MAC Address: ")+arpsmac);
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Sender IP Address: ")+sip);
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Target MAC Adress: ")+dmac);
+        itemChild = new QStandardItem(QObject::tr("Target MAC Adress: ")+arpdmac);
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Target IP Adress: ")+dip);
         item->appendRow(itemChild);
@@ -424,6 +440,14 @@ void MultiView::setHexViewByIndex(SnifferData snifferData)
             line.append("  ");
             line.append(ascii);
             line.append("\n");
+            textBrowser->insertPlainText(line);
+            line = QObject::tr("");
+            ascii = QObject::tr("");
+        } else if(cnt==((data.length()-17)/2)) {
+            for(int j=0;j<25-3*(cnt%8);j++) {
+                line.append("  ");
+            }
+            line.append(ascii);
             textBrowser->insertPlainText(line);
             line = QObject::tr("");
             ascii = QObject::tr("");
