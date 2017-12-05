@@ -173,9 +173,9 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Protocol Type: ")+QObject::tr("IPV4 (0x0800)")); //fake
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Hardware Size: ")+QString::number(ntohs(arph->arp_hln), 10));
+        itemChild = new QStandardItem(QObject::tr("Hardware Size: ")+QString::number((arph->arp_hln), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Protocol Size: ")+QString::number(ntohs(arph->arp_pln), 10));
+        itemChild = new QStandardItem(QObject::tr("Protocol Size: ")+QString::number((arph->arp_pln), 10));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Opcode: ")+ (((arph->arp_op)==0x0001)? QObject::tr("Request (1)"):QObject::tr("Reply (2)") ) );
         item->appendRow(itemChild);

@@ -155,7 +155,7 @@ void CaptureThread::run()
                 //pass,don't fragment
             } else {
                 if(pslideInfo->complete) {
-                    //pass
+                    iph->flags_fo=0x0000;//pass
                 } else {
                     continue;
                 }
