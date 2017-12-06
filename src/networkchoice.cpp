@@ -70,12 +70,6 @@ void NetworkChoice::addNetDevs()
 }
 
 
-/*void NetworkChoice::on_buttonBox_accepted()
-{
-    sniffer->currentNetName = ui->choiceBox->currentText();
-}
-*/
-
 
 void NetworkChoice::on_buttonBox_clicked()
 {

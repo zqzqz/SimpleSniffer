@@ -164,6 +164,10 @@ void ListView::getOrderNumber(QModelIndex &index, QString &strNumber)
     strNumber = mainModel->data(index, 0).toString();
 }
 
+int ListView::getPacketsNum()
+{
+    return packets.size();
+}
 /*
  * unused
  *

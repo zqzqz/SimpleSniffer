@@ -6,6 +6,7 @@ FileDialog::FileDialog(MultiView *v, QWidget *parent): QDialog(parent), ui(new U
 {
     ui->setupUi(this);
     choice.clear();
+
     model = new QStandardItemModel();
     model->setHorizontalHeaderItem(0,new QStandardItem(QObject::tr("ID")));
     model->setHorizontalHeaderItem(1,new QStandardItem(QObject::tr("Type")));
@@ -21,6 +22,7 @@ FileDialog::FileDialog(MultiView *v, QWidget *parent): QDialog(parent), ui(new U
     ui->fileView->horizontalHeader()->resizeSections(QHeaderView::ResizeMode::Fixed);
     ui->fileView->verticalHeader()->hide();
     ui->fileView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->fileView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->fileView->setTextElideMode(Qt::ElideMiddle);
     ui->fileView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
@@ -36,6 +38,8 @@ FileDialog::~FileDialog()
  */
 void FileDialog::prepare()
 {
+    ui->fileTypeBox->setCurrentIndex(0);
+    choice.clear();
     filtrateFile();
     displayFile();
 }
@@ -58,13 +62,31 @@ void FileDialog::filtrateFile()
 
         //analyse file type by common file headers
         if (payload.indexOf(QByteArray::fromHex("89504e47")) ==0) {
-            name = QString::number(id, 10) + tr(":PNG"); //test a png file
+            name = QString::number(id, 10) + tr(":png"); //test a png file
         }
         else if (payload.indexOf(QByteArray::fromHex("d0cf11e0a1b11ae1")) ==0) {
             name = QString::number(id, 10) + tr(":doc"); //test a doc file
         }
         else if (payload.indexOf(QByteArray::fromHex("ffd8ff")) ==0) {
             name = QString::number(id, 10) + tr(":jpg"); //test a jpg file
+        }
+        else if (payload.indexOf(QByteArray::fromHex("47494638")) ==0) {
+            name = QString::number(id, 10) + tr(":gif"); //test a gif file
+        }
+        else if (payload.indexOf(QByteArray::fromHex("504B0304")) ==0) {
+            name = QString::number(id, 10) + tr(":zip"); //test a zip file
+        }
+        else if (payload.indexOf(QByteArray::fromHex("52617221")) ==0) {
+            name = QString::number(id, 10) + tr(":rar"); //test a rar file
+        }
+        else if (payload.indexOf(QByteArray::fromHex("41564920")) ==0) {
+            name = QString::number(id, 10) + tr(":avi"); //test a avi file
+        }
+        else if (payload.indexOf(QByteArray::fromHex("68746D6C3E")) ==0) {
+            name = QString::number(id, 10) + tr(":html"); //test a html file
+        }
+        else if (payload.indexOf(QByteArray::fromHex("255044462D312E")) ==0) {
+            name = QString::number(id, 10) + tr(":pdf"); //test a pdf file
         }
         else {
             continue;
@@ -74,11 +96,9 @@ void FileDialog::filtrateFile()
 
         while (true) {
             //calculate next seq
+            snifferData = view->packets.at(index);
             _ip_header* iph = (_ip_header*) snifferData.protoInfo.pip;
             _tcp_header* tcph = (_tcp_header*) snifferData.protoInfo.ptcp;
-            unsigned int a=ntohs(iph->tlen);
-            unsigned int b=ntohs(iph->ver_ihl & 0x0F);
-            uint16_t c=ntohs(tcph->thl & 0xF0)/16;
             seq += (unsigned int)((ntohs(iph->tlen) - ntohs(iph->ver_ihl & 0x0F)/64- ntohs(tcph->thl & 0xF0)/16/64));
             //find next packet by seq
             mit = it->find(seq);
@@ -118,7 +138,6 @@ void FileDialog::displayFile()
 void FileDialog::rebuild()
 {
     model->clear();
-    choice.clear();
     model = new QStandardItemModel();
     model->setHorizontalHeaderItem(0,new QStandardItem(QObject::tr("ID")));
     model->setHorizontalHeaderItem(1,new QStandardItem(QObject::tr("Type")));
@@ -134,19 +153,16 @@ void FileDialog::rebuild()
     ui->fileView->horizontalHeader()->resizeSections(QHeaderView::ResizeMode::Fixed);
     ui->fileView->verticalHeader()->hide();
     ui->fileView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->fileView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->fileView->setTextElideMode(Qt::ElideMiddle);
     ui->fileView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void FileDialog::on_fileView_clicked(const QModelIndex &index)
 {
-    std::vector<QModelIndex>::iterator it = std::find(choice.begin(), choice.end(), index);
-    if (it == choice.end()) {
-        choice.push_back(index);
-    }
-    else {
-        choice.erase(it);
-    }
+    QString name = model->data(model->index(index.row(),0)).toString()+QObject::tr(":")+model->data(model->index(index.row(),1)).toString();
+    choice.clear();
+    choice.push_back(name);
     targetFileIndex = index;
 }
 
@@ -157,14 +173,14 @@ void FileDialog::on_fileView_clicked(const QModelIndex &index)
 void FileDialog::on_buttonBox_accepted()
 {
     std::vector<int> indexs;
-    for (std::vector<QModelIndex>::iterator it = choice.begin(); it!=choice.end(); it++) {
-        QString name = model->data(model->index(it->row(), 0)).toString() + tr(":") + model->data(model->index(it->row(), 1)).toString();
-        std::map<QString, std::vector<int> >::iterator mit = files.find(name);
+    for (std::vector<QString>::iterator it = choice.begin(); it!=choice.end(); it++) {
+        std::map<QString, std::vector<int> >::iterator mit = files.find(*it);
         if (mit == files.end()) continue;
         for (std::vector<int>::iterator indexit = mit->second.begin(); indexit!=mit->second.end(); indexit++) {
             indexs.push_back(*indexit);
         }
     }
+
     view->loadByIndex(indexs);
 }
 
@@ -189,5 +205,42 @@ void FileDialog::on_fileButton_clicked()
             }
             file.close();
         }
+    }
+}
+
+
+
+void FileDialog::on_fileTypeBox_activated(const QString &fileType)
+{
+    if (fileType==QObject::tr("all")) {
+        displayFile();
+        return;
+    }
+    choice.clear();
+    for (std::map<QString, std::vector<int> >::iterator it = files.begin(); it != files.end(); it++) {
+        if (fileType.indexOf(it->first.right(it->first.size() - it->first.indexOf(":") - 1))>=0) {
+            choice.push_back(it->first);
+        }
+    }
+    rebuildByType();
+}
+
+void FileDialog::rebuildByType()
+{
+    rebuild();
+    QStandardItem *item;
+    int index=0;
+    for (std::vector<QString>::iterator it = choice.begin(); it!=choice.end(); it++) {
+        std::map<QString, std::vector<int> >::iterator mit = files.find(*it);
+        if (mit == files.end()) continue;
+        item = new QStandardItem(mit->first.left(mit->first.indexOf(":")));
+        model->setItem(index, 0, item);
+        item = new QStandardItem(mit->first.right(mit->first.size() - mit->first.indexOf(":") - 1));
+        model->setItem(index, 1, item);
+        item = new QStandardItem(tr("unknown"));
+        model->setItem(index, 2, item);
+        item = new QStandardItem(QString::number(mit->second.size(), 10));
+        model->setItem(index, 3, item);
+        index++;
     }
 }
