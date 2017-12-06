@@ -12,6 +12,7 @@ public:
     bool checkWhetherSlide(_ip_header*);
     bool complete;            // is get all packets to rebuild info
     QByteArray rebuildByteData;
+    int rebuildTotalLength;
 
 private:
     bool insertPacket(SlidePacketInfo & tmpslide);

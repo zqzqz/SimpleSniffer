@@ -160,6 +160,18 @@ void CaptureThread::run()
                 if(pslideInfo->complete) {
                     iph->flags_fo=0x0000;//pass
                     tmpSnifferData.strProto+="(Rebuild)";
+                    QByteArray tmpHeaderByteData;
+                    tmpHeaderByteData.clear();
+                    tmpHeaderByteData.setRawData((const char*)sniffer->pktData,14+ip_lenth);
+                    tmpSnifferData.strData="raw capture data:";
+                    tmpSnifferData.strData.append(tmpHeaderByteData.toHex().toUpper());
+                    tmpSnifferData.strData.append(pslideInfo->rebuildByteData.toHex().toUpper());
+                    unsigned int rebuildLength;
+                    char            rebuildSizeLength[6];
+                    rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength;
+                    sprintf(rebuildSizeLength,"%d",rebuildLength);
+                    tmpSnifferData.strLength=rebuildSizeLength;
+
                 } else {
                     continue; //can't form an intact ip packet
                 }

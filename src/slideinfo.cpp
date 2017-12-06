@@ -7,6 +7,14 @@
 
 bool LessSort(slideSort a,slideSort b){return a.sortOffset<b.sortOffset;}
 
+bool operator ==(SlidePacketInfo &a,const SlidePacketInfo &b) {
+    if(a.fragmentIdentification==b.fragmentIdentification && a.fragmentOffset==b.fragmentOffset) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 SlideInfo::SlideInfo(int windowsize) {
     defaultWindowSize=windowsize;
 }
@@ -26,7 +34,7 @@ bool SlideInfo::insertPacket(SlidePacketInfo & tmpslide) {
     } else {
         allIpId.push_back(tmpslide.fragmentIdentification);
     }
-    std::vector<SlidePacketInfo>::iterator its;
+    std::vector<SlidePacketInfo>::const_iterator its;
     its=find(packetInfoForRebuild.begin(),packetInfoForRebuild.end(),tmpslide);
     if(its!=packetInfoForRebuild.end()) {
         packetInfoForRebuild.push_back(tmpslide);
@@ -37,7 +45,7 @@ bool SlideInfo::insertPacket(SlidePacketInfo & tmpslide) {
 
 bool SlideInfo::checkWhetherSlide(_ip_header* iph) {
     SlidePacketInfo tmpSlidePacketInfo;
-
+    rebuildTotalLength=0;
     sequence.clear();
     rebuildByteData.clear();
     headFlag=false;
@@ -54,7 +62,7 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph) {
     tmpSlidePacketInfo.fragmentIdentification=ntohs(iph->identification);
     tmpSlidePacketInfo.fragmentByteData.clear();
     tmpSlidePacketInfo.fragmentByteData.setRawData((const char*)(iph+(iph->ver_ihl & 0x0F)*4),(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
-    tmpSlidePacketInfo.nextFragmentOffset=ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4+tmpSlidePacketInfo.fragmentOffset;
+    tmpSlidePacketInfo.nextFragmentOffset=(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4)/8+tmpSlidePacketInfo.fragmentOffset; //the unit of offset is 8 bytes
     if(!(tmpSlidePacketInfo.fragmentFlag||tmpSlidePacketInfo.fragmentOffset!=0)) {
         return false;
     } else {
@@ -92,6 +100,7 @@ bool SlideInfo::rebuildInfo() {
             }
         }//loop3 end
         if(complete) {
+            rebuildTotalLength=packetInfoForRebuild.at((sequence.end()-1)->index).nextFragmentOffset*8;
             for(std::vector<slideSort>::iterator it2=sequence.begin();it2!=(sequence.end());++it2) {
                 rebuildByteData.append(packetInfoForRebuild.at(it2->index).fragmentByteData);
                 packetInfoForRebuild.erase(packetInfoForRebuild.begin()+it2->index);
