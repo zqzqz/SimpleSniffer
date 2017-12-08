@@ -195,7 +195,7 @@ void CaptureThread::run()
                 if(!pslideInfo->complete) {
                     memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 } else {
-                    memcpy(tcph, pslideInfo->rebuildByteData.data(), sizeof(_tcp_header));
+                    memcpy(tcph, pslideInfo->rebuildheader.data(), sizeof(_tcp_header));
                 }
                 //memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
@@ -242,7 +242,7 @@ void CaptureThread::run()
                 if(!pslideInfo->complete) {
                     memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
                 } else {
-                    memcpy(udph, pslideInfo->preheader, sizeof(_udp_header));
+                    memcpy(udph, pslideInfo->rebuildheader.data(), sizeof(_udp_header));
                 }
                 //memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
                 tmpSnifferData.protoInfo.tcpFlag = UDP_SIG;
@@ -286,7 +286,7 @@ void CaptureThread::run()
                 if(!pslideInfo->complete) {
                     memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
                 } else {
-                    memcpy(igmph, pslideInfo->preheader, sizeof(_igmp_header));
+                    memcpy(igmph, pslideInfo->rebuildheader.data(), sizeof(_igmp_header));
                 }
                 memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = IGMP_SIG;

@@ -70,7 +70,7 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata,QB
     tmpSlidePacketInfo.fragmentheader.clear();
     //tmpSlidePacketInfo.fragmentByteData.setRawData((const char*)(iph+(iph->ver_ihl & 0x0F)*4),(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
     tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
-    tmpSlidePacketInfo.fragmentByteData=tmpsnifferdata.strData.mid(85,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4)*2);
+    tmpSlidePacketInfo.fragmentByteData=tmpsnifferdata.strData.mid(45+2*(iph->ver_ihl & 0x0F)*4,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4)*2);
     tmpSlidePacketInfo.header=(void*)(iph+(iph->ver_ihl & 0x0F)*4);
     tmpSlidePacketInfo.fragmentheader=rawbyte.mid(14+(iph->ver_ihl & 0x0F)*4,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
 
@@ -170,10 +170,15 @@ bool SlideInfo::rebuildInfo() {
                 LOG(rebuildByteData.size());
                 //packetInfoForRebuild.erase(packetInfoForRebuild.begin()+it2->index);
             } //delete all packets info which is already rebuilt
-            for(std::vector<slideSort>::iterator it2=(sequence.begin());it2!=(sequence.end());++it2) {
+            for(int si=packetInfoForRebuild.size()-1;si>=0;si--) {
+
+                if(packetInfoForRebuild[si].fragmentIdentification==*it) {
+                    packetInfoForRebuild.erase(packetInfoForRebuild.begin()+si);
+                }
                 //std::vector<SlidePacketInfo> itpacket;
                 //std::find(packetInfoForRebuild.begin(),packetInfoForRebuild.end(),)
             } //delete all packets info which is already rebuilt
+            allIpId.erase(it);
             if(isFull()) {
                 packetInfoForRebuild.clear();
             }
