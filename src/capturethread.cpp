@@ -156,7 +156,7 @@ void CaptureThread::run()
             //above:finished processing ip header
 /**************************************ip slide and rebuild*************************************/
 
-            if(!pslideInfo->checkWhetherSlide(iph,tmpSnifferData)) {
+            if(!pslideInfo->checkWhetherSlide(iph,tmpSnifferData,rawByteData)) {
                 LOG("in if");
                 //pass,don't fragment
             } else {
@@ -183,22 +183,6 @@ void CaptureThread::run()
                     rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength+14;
                     sprintf(rebuildSizeLength,"%d",rebuildLength);
                     tmpSnifferData.strLength=rebuildSizeLength;
-
-                    //LOG(QString::number(ntohs(iph->identification), 16).toStdString());
-                    //LOG(QString::number((iph->identification), 10).toStdString());
-                    //LOG(pslideInfo->rebuildByteData.toStdString());
-                    //LOG(tmpSnifferData.strData.size());
-                    //LOG(tmpHeaderByteData.size());
-
-                    QString testbytedata=pslideInfo->rebuildByteData;
-                    QString testbyte1=QObject::tr("");
-                    testbyte1.append(testbytedata[0]);
-                    testbyte1.append(testbytedata[1]);
-                    testbyte1.append(testbytedata[2]);
-                    testbyte1.append(testbytedata[3]);
-                    LOG(testbyte1.toStdString());
-
-
                 } else {
                     continue; //can't form an intact ip packet
                 }
@@ -211,7 +195,7 @@ void CaptureThread::run()
                 if(!pslideInfo->complete) {
                     memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 } else {
-                    memcpy(tcph, pslideInfo->preheader, sizeof(_tcp_header));
+                    memcpy(tcph, pslideInfo->rebuildByteData.data(), sizeof(_tcp_header));
                 }
                 //memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
@@ -287,8 +271,8 @@ void CaptureThread::run()
                     memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
                 } else {
                     LOG("hhh");
-                    memcpy(icmph,(pslideInfo->preheader), sizeof(_icmp_header));
-                    LOG((short)(icmph->type));
+                    memcpy(icmph,(pslideInfo->rebuildheader.data()), sizeof(_icmp_header));
+                    LOG((icmph->type));
                 }
                 //memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;

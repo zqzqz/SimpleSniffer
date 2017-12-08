@@ -47,7 +47,7 @@ bool SlideInfo::insertPacket(SlidePacketInfo & tmpslide) {
     return true;
 }
 
-bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata) {
+bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata,QByteArray & rawbyte) {
     SlidePacketInfo tmpSlidePacketInfo;
     rebuildTotalLength=0;
     sequence.clear();
@@ -72,6 +72,7 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata) {
     tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
     tmpSlidePacketInfo.fragmentByteData=tmpsnifferdata.strData.mid(85,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4)*2);
     tmpSlidePacketInfo.header=(void*)(iph+(iph->ver_ihl & 0x0F)*4);
+    tmpSlidePacketInfo.fragmentheader=rawbyte.mid(14+(iph->ver_ihl & 0x0F)*4,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
 
     //tmpSlidePacketInfo.fragmenthead.setRawData((const char*)(resniffer.pktData+14+(iph->ver_ihl & 0x0F)*4),)
     //tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
@@ -162,6 +163,7 @@ bool SlideInfo::rebuildInfo() {
                 LOG(packetInfoForRebuild.at(it2->index).fragmentByteData.size());
                 if(it2==sequence.begin()) {
                     preheader=packetInfoForRebuild.at(it2->index).header;
+                    rebuildheader=packetInfoForRebuild.at(it2->index).fragmentheader;
                 }
                 rebuildByteData.append(packetInfoForRebuild.at(it2->index).fragmentByteData);
 
