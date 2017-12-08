@@ -102,7 +102,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Total Length: ")+QString::number(ntohs(iph->tlen), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Identification: 0x")+QString::number(ntohs(iph->identification), 16) +QObject::tr("  ")+ QString::number((iph->identification), 10));
+        itemChild = new QStandardItem(QObject::tr("Identification: 0x")+QString::number(ntohs(iph->identification), 16) +QObject::tr("  ")+ QString::number(ntohs(iph->identification), 10));
         item->appendRow(itemChild);
         itemSub = new QStandardItem(QObject::tr("Flags"));
         item->appendRow(itemSub);
@@ -115,7 +115,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         itemSub->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Fragment Offset: ")+QString::number((ntohs(iph->flags_fo) & 0x1FFF), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Time to Live: ")+QString::number(ntohs(iph->ttl), 10));
+        itemChild = new QStandardItem(QObject::tr("Time to Live: ")+QString::number((iph->ttl), 10));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Protocal: ")+snifferData.protoInfo.ipProto);
         item->appendRow(itemChild);
@@ -153,6 +153,9 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
             case 68:
                 ipOptionDataType="Internet Timestamp";
                 break;
+            case 148:
+                ipOptionDataType="Router Alert";
+                break;
             default:
                 ipOptionDataType="Unknow Option";
                 break;
@@ -160,7 +163,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         } else {
             ipOptionDataType="No Option";
         }
-        itemChild = new QStandardItem(QObject::tr("Option Data: ")+ipOptionData);
+        itemChild = new QStandardItem(QObject::tr("Option Data: ")+ipOptionDataType);
         item->appendRow(itemChild);
         break;
     }
@@ -256,8 +259,41 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Urgent Pointer: ")+QString::number(tcph->urgt_p, 10));
         item->appendRow(itemChild);
-        itemSub = new QStandardItem(QObject::tr("Options"));
-        item->appendRow(itemSub);
+        //itemSub = new QStandardItem(QObject::tr("Options"));
+        //item->appendRow(itemSub);
+        unsigned short tcpOption=tcph->tcpOptionData;
+        QString tcpOptionType;
+        if(((tcph->thl & 0xF0)/4)>20) {
+            switch (tcpOption) {
+            case 0:
+                tcpOptionType="End Of Option List";
+                break;
+            case 1:
+                tcpOptionType="No Operation";
+                break;
+            case 2:
+                tcpOptionType="Maximum Segment Size";
+                break;
+            case 3:
+                tcpOptionType="Window Scale";
+                break;
+            case 4:
+                tcpOptionType="Selective ACK ok";
+                break;
+            case 5:
+                tcpOptionType="Selective ACK";
+                break;
+            case 8:
+                tcpOptionType="Timestamp";
+                break;
+            default:
+                tcpOptionType="Unknow";
+                break;
+            }
+            itemChild=new QStandardItem(QObject::tr("Option: ")+tcpOptionType);
+            item->appendRow(itemChild);
+        }
+
         //treeView->setExpanded(itemSub->index(), true);
         break;
     }

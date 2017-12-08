@@ -50,6 +50,7 @@ void CaptureThread::run()
     time_t          local_tv_sec;
     struct          tm* ltime;   //tm defined in time.h
     char            timestr[16];
+
     //int             whetherFragment=0;
 
     //open net device
@@ -149,24 +150,34 @@ void CaptureThread::run()
 
             //above:finished processing ip header
 /**************************************ip slide and rebuild*************************************/
-            if(!pslideInfo->checkWhetherSlide(iph)) {
+
+            if(!pslideInfo->checkWhetherSlide(iph,tmpSnifferData,rawByteData)) {
+                LOG("in if");
                 //pass,don't fragment
             } else {
+                LOG("get a slide of ip packet!!!!!!!!!!!!!!!!!");
+
                 if(pslideInfo->complete) {
+                    LOG("rebuild a full packet");
                     iph->flags_fo=0x0000;//pass
                     tmpSnifferData.strProto+="(Rebuild)";
                     QByteArray tmpHeaderByteData;
                     tmpHeaderByteData.clear();
+
                     tmpHeaderByteData.setRawData((const char*)sniffer->pktData,14+ip_lenth);
+                    //tmpSnifferData.strData.clear();
                     tmpSnifferData.strData="raw capture data:";
+                    //LOG(tmpSnifferData.strData.size());
                     tmpSnifferData.strData.append(tmpHeaderByteData.toHex().toUpper());
-                    tmpSnifferData.strData.append(pslideInfo->rebuildByteData.toHex().toUpper());
+                    //LOG(tmpSnifferData.strData.size());
+                    tmpSnifferData.strData.append(pslideInfo->rebuildByteData);
+
+
                     unsigned int rebuildLength;
                     char            rebuildSizeLength[6];
-                    rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength;
+                    rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength+14;
                     sprintf(rebuildSizeLength,"%d",rebuildLength);
                     tmpSnifferData.strLength=rebuildSizeLength;
-
                 } else {
                     continue; //can't form an intact ip packet
                 }
@@ -180,7 +191,6 @@ void CaptureThread::run()
                 } else {
                     tcph = (_tcp_header*) &pslideInfo->rebuildByteData;
                 }
-                //memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) tcph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("TCP");
@@ -226,7 +236,6 @@ void CaptureThread::run()
                 } else {
                     udph = (_udp_header*) &pslideInfo->rebuildByteData;
                 }
-                //memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
                 tmpSnifferData.protoInfo.tcpFlag = UDP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) udph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("UDP");
@@ -246,14 +255,13 @@ void CaptureThread::run()
                 break;
 
             case ICMP_SIG:
-                tmpSnifferData.strProto="ICMP";
+                tmpSnifferData.strProto+="ICMP";
 
                 if(!pslideInfo->complete) {
                     icmph = (_icmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
                     icmph = (_icmp_header*) &pslideInfo->rebuildByteData;
                 }
-                //memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) icmph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("ICMP");
@@ -267,7 +275,6 @@ void CaptureThread::run()
                 } else {
                     igmph = (_igmp_header*) &pslideInfo->rebuildByteData;
                 }
-                memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = IGMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) igmph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("IGMP");
@@ -309,6 +316,8 @@ void CaptureThread::run()
         if (fileFlag && tmpSnifferData.protoInfo.strSendInfo.size()>100) {
             view->addFilePacket(tmpSnifferData.strSIP+tmpSnifferData.strDIP, ntohl(tcph->seq_no), num-1);
         }
+
+
         if (flag==1&&bstop==false) {
             sprintf(sizeNum,"%d",num);
             tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet

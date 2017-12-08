@@ -27,6 +27,7 @@ private:
     QString filename;
     MultiView *view;
     Filter *filter;
+    //SlideInfo *pslideInfo;
     SlideInfo *pslideInfo;
 };
 
