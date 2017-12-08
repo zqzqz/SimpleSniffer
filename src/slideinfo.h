@@ -5,14 +5,19 @@
 #include <vector>
 #include "type.h"
 
+
+
+
 class SlideInfo
 {
 public:
     SlideInfo(int a=10);
-    bool checkWhetherSlide(_ip_header*);
+    bool checkWhetherSlide(_ip_header*,SnifferData &);
     bool complete;            // is get all packets to rebuild info
     QByteArray rebuildByteData;
+    //QByteArray rebuildheader;
     int rebuildTotalLength;
+    void* preheader;
 
 private:
     bool insertPacket(SlidePacketInfo & tmpslide);

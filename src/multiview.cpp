@@ -102,7 +102,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Total Length: ")+QString::number(ntohs(iph->tlen), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Identification: 0x")+QString::number(ntohs(iph->identification), 16) +QObject::tr("  ")+ QString::number((iph->identification), 10));
+        itemChild = new QStandardItem(QObject::tr("Identification: 0x")+QString::number(ntohs(iph->identification), 16) +QObject::tr("  ")+ QString::number(ntohs(iph->identification), 10));
         item->appendRow(itemChild);
         itemSub = new QStandardItem(QObject::tr("Flags"));
         item->appendRow(itemSub);
@@ -115,7 +115,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         itemSub->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Fragment Offset: ")+QString::number((ntohs(iph->flags_fo) & 0x1FFF), 10));
         item->appendRow(itemChild);
-        itemChild = new QStandardItem(QObject::tr("Time to Live: ")+QString::number(ntohs(iph->ttl), 10));
+        itemChild = new QStandardItem(QObject::tr("Time to Live: ")+QString::number((iph->ttl), 10));
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Protocal: ")+snifferData.protoInfo.ipProto);
         item->appendRow(itemChild);

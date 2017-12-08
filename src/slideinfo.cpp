@@ -4,6 +4,7 @@
 #include <functional>
 #include <algorithm>
 #include <iostream>
+#include "log.h"
 
 bool LessSort(slideSort a,slideSort b){return a.sortOffset<b.sortOffset;}
 
@@ -34,16 +35,19 @@ bool SlideInfo::insertPacket(SlidePacketInfo & tmpslide) {
     } else {
         allIpId.push_back(tmpslide.fragmentIdentification);
     }
+    //LOG("plug in insert");
     std::vector<SlidePacketInfo>::const_iterator its;
     its=find(packetInfoForRebuild.begin(),packetInfoForRebuild.end(),tmpslide);
-    if(its!=packetInfoForRebuild.end()) {
+    if(its==packetInfoForRebuild.end()) {   //it is a new packet
         packetInfoForRebuild.push_back(tmpslide);
+        if(tmpslide.fragmentFlag==false && tmpslide.fragmentOffset!=0) {LOG("get tail");}
+        if(tmpslide.fragmentFlag==true && tmpslide.fragmentOffset==0) {LOG("get head");}
     }  //discard repetitive packets
     //packetInfoForRebuild.push_back(tmpslide);
     return true;
 }
 
-bool SlideInfo::checkWhetherSlide(_ip_header* iph) {
+bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata) {
     SlidePacketInfo tmpSlidePacketInfo;
     rebuildTotalLength=0;
     sequence.clear();
@@ -58,28 +62,64 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph) {
         tmpSlidePacketInfo.fragmentFlag=false;
     }
 
+
+
     tmpSlidePacketInfo.fragmentOffset=(ntohs(iph->flags_fo) & 0x1FFF);
     tmpSlidePacketInfo.fragmentIdentification=ntohs(iph->identification);
     tmpSlidePacketInfo.fragmentByteData.clear();
-    tmpSlidePacketInfo.fragmentByteData.setRawData((const char*)(iph+(iph->ver_ihl & 0x0F)*4),(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
+    tmpSlidePacketInfo.fragmentheader.clear();
+    //tmpSlidePacketInfo.fragmentByteData.setRawData((const char*)(iph+(iph->ver_ihl & 0x0F)*4),(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
+    tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
+    tmpSlidePacketInfo.fragmentByteData=tmpsnifferdata.strData.mid(85,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4)*2);
+    tmpSlidePacketInfo.header=(void*)(iph+(iph->ver_ihl & 0x0F)*4);
+
+    //tmpSlidePacketInfo.fragmenthead.setRawData((const char*)(resniffer.pktData+14+(iph->ver_ihl & 0x0F)*4),)
+    //tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
+    /*for(int i=0;i<(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4);i++) {
+        tmpSlidePacketInfo.fragmentByteData.append(tmpsnifferdata.strData[51+i]);
+    }*/
+
+
+    QString testbytedata=tmpSlidePacketInfo.fragmentheader.toHex().toUpper();
+    QString testbyte1=QObject::tr("");
+    testbyte1.append(testbytedata[0]);
+    testbyte1.append(testbytedata[1]);
+    testbyte1.append(testbytedata[2]);
+    testbyte1.append(testbytedata[3]);
+    LOG(testbyte1.toStdString());
+
+
     tmpSlidePacketInfo.nextFragmentOffset=(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4)/8+tmpSlidePacketInfo.fragmentOffset; //the unit of offset is 8 bytes
+
+
+    LOG("OFFSET");
+    LOG(tmpSlidePacketInfo.fragmentOffset);
+    LOG(tmpSlidePacketInfo.fragmentByteData.size());
+
+    QString test=testbytedata;
+    //test=tmpSlidePacketInfo.fragmentByteData;
+
+    LOG("plug in 1");
     if(!(tmpSlidePacketInfo.fragmentFlag||tmpSlidePacketInfo.fragmentOffset!=0)) {
         return false;
     } else {
         insertPacket(tmpSlidePacketInfo);
+        //LOG("back to check");
         rebuildInfo();
+        //LOG("back to check after rebuild");
         return true;
     }
 
 }
 
 bool SlideInfo::rebuildInfo() {
-    for(std::vector<int>::iterator it;it!=allIpId.begin();it++) {
+    for(std::vector<int>::iterator it=allIpId.begin();it!=allIpId.end();it++) {
         sequence.clear();
         rebuildByteData.clear();
         headFlag=false;
         tailFlag=false;
         complete=false;
+        //LOG("plug in rebuild");
         for(std::vector<SlidePacketInfo>::iterator its=packetInfoForRebuild.begin();its!=packetInfoForRebuild.end();its++) {
             if(*it==its->fragmentIdentification) {
                 if(its->fragmentFlag==false && its->fragmentOffset!=0) {tailFlag=true;}
@@ -88,26 +128,62 @@ bool SlideInfo::rebuildInfo() {
                 tmpSlideSort.index=its-packetInfoForRebuild.begin();
                 tmpSlideSort.sortOffset=its->fragmentOffset;
                 sequence.push_back(tmpSlideSort);
+                //LOG("loop2 end");
             }
         }// loop2 end
+
+        LOG("REBUILD 1");
+
         std::sort(sequence.begin(),sequence.end(),LessSort);
-        for(std::vector<slideSort>::iterator it2=sequence.begin();it2!=(sequence.end()-1);++it2) {
-            if(packetInfoForRebuild.at(it2->index).nextFragmentOffset==packetInfoForRebuild.at(it2->index+1).fragmentOffset) {
+        for(std::vector<slideSort>::iterator it2=sequence.begin();(it2+1)!=(sequence.end())&&it2!=sequence.end();++it2) {
+            LOG("while");
+
+                LOG(it2->index);
+            if(packetInfoForRebuild.at(it2->index).nextFragmentOffset==packetInfoForRebuild.at((it2+1)->index).fragmentOffset) {
+                LOG(packetInfoForRebuild.size());
+                //LOG("TRUE");
                 complete=true;
             } else {
+                //LOG("FALSE");
                 complete=false;
                 break;
             }
-        }//loop3 end
+
+
+        }//loop3 end,fine okay
+
+        LOG("rebuild 2");
         if(complete) {
+            rebuildByteData.clear();
             rebuildTotalLength=packetInfoForRebuild.at((sequence.end()-1)->index).nextFragmentOffset*8;
-            for(std::vector<slideSort>::iterator it2=sequence.begin();it2!=(sequence.end());++it2) {
+            LOG(rebuildTotalLength);
+            for(std::vector<slideSort>::iterator it2=(sequence.begin());it2!=(sequence.end());++it2) {
+                LOG("yes");
+                LOG(packetInfoForRebuild.at(it2->index).fragmentByteData.size());
+                if(it2==sequence.begin()) {
+                    preheader=packetInfoForRebuild.at(it2->index).header;
+                }
                 rebuildByteData.append(packetInfoForRebuild.at(it2->index).fragmentByteData);
-                packetInfoForRebuild.erase(packetInfoForRebuild.begin()+it2->index);
+
+                LOG(rebuildByteData.size());
+                //packetInfoForRebuild.erase(packetInfoForRebuild.begin()+it2->index);
+            } //delete all packets info which is already rebuilt
+            for(std::vector<slideSort>::iterator it2=(sequence.begin());it2!=(sequence.end());++it2) {
+                //std::vector<SlidePacketInfo> itpacket;
+                //std::find(packetInfoForRebuild.begin(),packetInfoForRebuild.end(),)
             } //delete all packets info which is already rebuilt
             if(isFull()) {
                 packetInfoForRebuild.clear();
             }
+
+            LOG("TOTAL LENGTH");
+
+            QString test;
+            test=rebuildByteData.toHex().toUpper();
+            for(int i=0;i<8;i++) {
+                std::cout<<test[i].toLatin1()<<std::endl;
+            }
+
             return true;
         }
     } //loop1 end

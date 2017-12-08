@@ -182,6 +182,8 @@ struct SlidePacketInfo
     bool            fragmentFlag;
     unsigned short fragmentOffset;
     QByteArray     fragmentByteData;
+    QByteArray      fragmentheader;
+    void * header;
 };
 
 
