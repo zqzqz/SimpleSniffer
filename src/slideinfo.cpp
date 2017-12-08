@@ -139,13 +139,19 @@ bool SlideInfo::rebuildInfo() {
         for(std::vector<slideSort>::iterator it2=sequence.begin();(it2+1)!=(sequence.end())&&it2!=sequence.end();++it2) {
             LOG("while");
 
-                LOG(it2->index);
-            if(packetInfoForRebuild.at(it2->index).nextFragmentOffset==packetInfoForRebuild.at((it2+1)->index).fragmentOffset) {
-                LOG(packetInfoForRebuild.size());
-                //LOG("TRUE");
-                complete=true;
-            } else {
-                //LOG("FALSE");
+            LOG(it2->index);
+
+            if(tailFlag&&headFlag) {
+               if(packetInfoForRebuild.at(it2->index).nextFragmentOffset==packetInfoForRebuild.at((it2+1)->index).fragmentOffset) {
+                    LOG(packetInfoForRebuild.size());
+                    //LOG("TRUE");
+                    complete=true;
+               } else {
+                   //LOG("FALSE");
+                   complete=false;
+                   break;
+               }
+            } else{
                 complete=false;
                 break;
             }
