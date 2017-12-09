@@ -69,7 +69,7 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata,QB
     tmpSlidePacketInfo.fragmentByteData.clear();
     tmpSlidePacketInfo.fragmentheader.clear();
     //tmpSlidePacketInfo.fragmentByteData.setRawData((const char*)(iph+(iph->ver_ihl & 0x0F)*4),(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
-    tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
+    //tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
     tmpSlidePacketInfo.fragmentByteData=tmpsnifferdata.strData.mid(14+(iph->ver_ihl & 0x0F)*4,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
     tmpSlidePacketInfo.header=(void*)(iph+(iph->ver_ihl & 0x0F)*4);
     tmpSlidePacketInfo.fragmentheader=rawbyte.mid(14+(iph->ver_ihl & 0x0F)*4,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
@@ -101,7 +101,7 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata,QB
     //test=tmpSlidePacketInfo.fragmentByteData;
 
     LOG("plug in 1");
-    if(!(tmpSlidePacketInfo.fragmentFlag||tmpSlidePacketInfo.fragmentOffset!=0)) {
+    if(!(tmpSlidePacketInfo.fragmentFlag==1||tmpSlidePacketInfo.fragmentOffset!=0)) {
         return false;
     } else {
         insertPacket(tmpSlidePacketInfo);
@@ -162,12 +162,14 @@ bool SlideInfo::rebuildInfo() {
         LOG("rebuild 2");
         if(complete) {
             rebuildByteData.clear();
+            preheader=NULL;
             rebuildTotalLength=packetInfoForRebuild.at((sequence.end()-1)->index).nextFragmentOffset*8;
             LOG(rebuildTotalLength);
             for(std::vector<slideSort>::iterator it2=(sequence.begin());it2!=(sequence.end());++it2) {
                 LOG("yes");
                 LOG(packetInfoForRebuild.at(it2->index).fragmentByteData.size());
                 if(it2==sequence.begin()) {
+                    LOG("header");
                     preheader=packetInfoForRebuild.at(it2->index).header;
                     rebuildheader=packetInfoForRebuild.at(it2->index).fragmentheader;
                 }

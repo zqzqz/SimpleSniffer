@@ -159,7 +159,7 @@ void CaptureThread::run()
 
                 if(pslideInfo->complete) {
                     LOG("rebuild a full packet");
-                    iph->flags_fo=0x0000;//pass
+                    //iph->flags_fo=0x0000;//pass
                     tmpSnifferData.strProto+="(Rebuild)";
                     QByteArray tmpHeaderByteData;
                     tmpHeaderByteData.clear();
@@ -176,6 +176,7 @@ void CaptureThread::run()
                     unsigned int rebuildLength;
                     char            rebuildSizeLength[6];
                     rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength+14;
+                    //iph->tlen=htons((short)(ip_lenth+pslideInfo->rebuildTotalLength));
                     sprintf(rebuildSizeLength,"%d",rebuildLength);
                     tmpSnifferData.strLength=rebuildSizeLength;
                 } else {
@@ -260,7 +261,7 @@ void CaptureThread::run()
                 if(!pslideInfo->complete) {
                     icmph = (_icmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
-                    icmph = (_icmp_header*) pslideInfo->rebuildheader.data();
+                    icmph = (_icmp_header*) (pslideInfo->rebuildheader.data());
                 }
                 tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) icmph;
