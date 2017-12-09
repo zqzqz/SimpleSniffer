@@ -30,7 +30,7 @@ public:
 
     void rebuildInfo();
     bool isChanged();
-
+    int getPacketsNum();
     void addPacketItem(SnifferData &data, bool fnew=true, bool display=true);
     void loadByIndex(std::vector<int> &indexs);
     void getOrderNumber(QModelIndex &index, QString &strNumber);

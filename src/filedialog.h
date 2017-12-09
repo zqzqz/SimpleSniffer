@@ -15,7 +15,7 @@ public:
     void filtrateFile();
     void prepare();
     void displayFile();
-    std::vector<QModelIndex> choice;
+    std::vector<QString> choice;
     QModelIndex targetFileIndex;
 
 private slots:
@@ -26,12 +26,17 @@ private slots:
 
     void on_fileButton_clicked();
 
+    void on_fileTypeBox_activated(int index);
+
+    void on_fileTypeBox_activated(const QString &arg1);
+
 private:
     Ui::FileDialog *ui;
     MultiView *view;
     QStandardItemModel *model;
     std::map< QString, std::vector<int> > files;
     void rebuild();
+    void rebuildByType();
 };
 
 

@@ -93,8 +93,7 @@ void CaptureThread::run()
         rawByteData.clear();
         rawByteData.setRawData((const char*)sniffer->pktData,sniffer->header->caplen);  //save packet to qbytearray
 
-        tmpSnifferData.strData="raw capture data:" ;//+rawByteData.toHex().toUpper();
-        tmpSnifferData.strData.append(rawByteData.toHex().toUpper());
+        tmpSnifferData.strData=rawByteData;
 
         local_tv_sec=sniffer->header->ts.tv_sec;  //seconds since 1900
         ltime=localtime(&local_tv_sec); //get local time
@@ -129,11 +128,8 @@ void CaptureThread::run()
         //rebuildInfo="";
 
         //First get Mac header
-
-        eth=new _eth_header();
-        memcpy(eth, sniffer->pktData, sizeof(_eth_header));
+        eth = (_eth_header*) tmpSnifferData.strData.data();
         tmpSnifferData.protoInfo.peth = (void*) eth;
-
         //Second get ip header
 
 /********************************************IP begin****************************************/
@@ -142,11 +138,10 @@ void CaptureThread::run()
             LOG("it is IP packet");
 
             flag=1;
-            iph=new _ip_header();
-            memcpy(iph, sniffer->pktData+14, sizeof(_ip_header));
 
-            tmpSnifferData.protoInfo.ipFlag = EPT_IP;
+            iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
             tmpSnifferData.protoInfo.pip = (void*) iph;
+            tmpSnifferData.protoInfo.ipFlag = EPT_IP;
 
             //get length of ip header
             ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
@@ -191,13 +186,11 @@ void CaptureThread::run()
 /**************************************higher protocol on ip************************************/
             switch(iph->proto) {
             case TCP_SIG:
-                tcph=new _tcp_header();
                 if(!pslideInfo->complete) {
-                    memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
+                    tcph = (_tcp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
-                    memcpy(tcph, pslideInfo->rebuildheader.data(), sizeof(_tcp_header));
+                    tcph = (_tcp_header*) &pslideInfo->rebuildByteData;
                 }
-                //memcpy(tcph, sniffer->pktData+14+ip_lenth, sizeof(_tcp_header));
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) tcph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("TCP");
@@ -229,8 +222,8 @@ void CaptureThread::run()
                     tmpSnifferData.protoInfo.appFlag = HTTP_PORT;
                 } else {
                     tmpSnifferData.protoInfo.appFlag = 0;
-                    fileFlag = true;
                 }
+                fileFlag = true;
                 tmpSnifferData.protoInfo.strSendInfo = rawByteData.remove(0, 54);
                 break;
 
@@ -238,13 +231,11 @@ void CaptureThread::run()
                 tmpSnifferData.strProto="UDP";
                 tmpSnifferData.strProtoForShow="User Datagram Protocol";
 
-                udph=new _udp_header();
                 if(!pslideInfo->complete) {
-                    memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
+                    udph = (_udp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
-                    memcpy(udph, pslideInfo->rebuildheader.data(), sizeof(_udp_header));
+                    udph = (_udp_header*) &pslideInfo->rebuildByteData;
                 }
-                //memcpy(udph, sniffer->pktData+14+ip_lenth, sizeof(_udp_header));
                 tmpSnifferData.protoInfo.tcpFlag = UDP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) udph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("UDP");
@@ -266,15 +257,11 @@ void CaptureThread::run()
             case ICMP_SIG:
                 tmpSnifferData.strProto+="ICMP";
 
-                icmph=new _icmp_header();
                 if(!pslideInfo->complete) {
-                    memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
+                    icmph = (_icmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
-                    LOG("hhh");
-                    memcpy(icmph,(pslideInfo->rebuildheader.data()), sizeof(_icmp_header));
-                    LOG((icmph->type));
+                    icmph = (_icmp_header*) &pslideInfo->rebuildByteData;
                 }
-                //memcpy(icmph, sniffer->pktData+14+ip_lenth, sizeof(_icmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) icmph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("ICMP");
@@ -284,11 +271,10 @@ void CaptureThread::run()
 
                 igmph=new _igmp_header();
                 if(!pslideInfo->complete) {
-                    memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
+                    igmph = (_igmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
-                    memcpy(igmph, pslideInfo->rebuildheader.data(), sizeof(_igmp_header));
+                    igmph = (_igmp_header*) &pslideInfo->rebuildByteData;
                 }
-                memcpy(igmph, sniffer->pktData+14+ip_lenth, sizeof(_igmp_header));
                 tmpSnifferData.protoInfo.tcpFlag = IGMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) igmph;
                 tmpSnifferData.protoInfo.ipProto = QObject::tr("IGMP");
@@ -307,8 +293,8 @@ void CaptureThread::run()
 
             tmpSnifferData.strProto="ARP";
             //get arp protocol header
-            arph = new _arp_header();
-            memcpy(arph, (sniffer->pktData+14), sizeof(_arp_header));
+
+            arph = (_arp_header*) (tmpSnifferData.strData.data()+14);
             tmpSnifferData.protoInfo.ipFlag = EPT_ARP;
             tmpSnifferData.protoInfo.pip = (void*) arph;
 
@@ -333,13 +319,13 @@ void CaptureThread::run()
 
 
         if (flag==1&&bstop==false) {
-
             sprintf(sizeNum,"%d",num);
             tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet
             view->addPacketItem(tmpSnifferData, true, filter->launchOneFilter(tmpSnifferData));
             num++;
 
         }
+
 
     }
     delete pslideInfo;

@@ -457,7 +457,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
  */
 void MultiView::setHexViewByIndex(SnifferData snifferData)
 {
-    QByteArray rawData = snifferData.strData;
+    QByteArray rawData = snifferData.strData.toHex().toUpper();
     bool ok; int cnt = 0;
     QString data = rawData;
     QString byte;
