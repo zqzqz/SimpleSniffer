@@ -26,7 +26,7 @@ private slots:
 
     void on_fileButton_clicked();
 
-    void on_fileTypeBox_activated(int index);
+    //void on_fileTypeBox_activated(int index);
 
     void on_fileTypeBox_activated(const QString &arg1);
 

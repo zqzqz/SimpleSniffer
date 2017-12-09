@@ -463,7 +463,7 @@ void MultiView::setHexViewByIndex(SnifferData snifferData)
     QString byte;
     QString ascii = QObject::tr("");
     QString line = QObject::tr("");
-    for (int i=17; i<data.length(); i = i+2) {
+    for (int i=0; i<data.length(); i = i+2) {    //from 17
         cnt += 1;
         byte = QObject::tr("");
         byte.append(data[i]);
@@ -479,7 +479,7 @@ void MultiView::setHexViewByIndex(SnifferData snifferData)
             textBrowser->insertPlainText(line);
             line = QObject::tr("");
             ascii = QObject::tr("");
-        } else if(cnt==((data.length()-17)/2)) {
+        } else if(cnt==((data.length())/2)) {    //length-17
             for(int j=0;j<25-3*(cnt%8);j++) {
                 line.append("  ");
             }

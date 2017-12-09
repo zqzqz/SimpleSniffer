@@ -166,9 +166,9 @@ void CaptureThread::run()
 
                     tmpHeaderByteData.setRawData((const char*)sniffer->pktData,14+ip_lenth);
                     //tmpSnifferData.strData.clear();
-                    tmpSnifferData.strData="raw capture data:";
+                    //tmpSnifferData.strData="raw capture data:";
                     //LOG(tmpSnifferData.strData.size());
-                    tmpSnifferData.strData.append(tmpHeaderByteData.toHex().toUpper());
+                    tmpSnifferData.strData=(tmpHeaderByteData);
                     //LOG(tmpSnifferData.strData.size());
                     tmpSnifferData.strData.append(pslideInfo->rebuildByteData);
 
@@ -189,7 +189,7 @@ void CaptureThread::run()
                 if(!pslideInfo->complete) {
                     tcph = (_tcp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
-                    tcph = (_tcp_header*) &pslideInfo->rebuildByteData;
+                    tcph = (_tcp_header*) pslideInfo->rebuildheader.data();
                 }
                 tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) tcph;
@@ -260,7 +260,7 @@ void CaptureThread::run()
                 if(!pslideInfo->complete) {
                     icmph = (_icmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
                 } else {
-                    icmph = (_icmp_header*) &pslideInfo->rebuildByteData;
+                    icmph = (_icmp_header*) pslideInfo->rebuildheader.data();
                 }
                 tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
                 tmpSnifferData.protoInfo.ptcp = (void*) icmph;
