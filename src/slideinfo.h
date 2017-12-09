@@ -11,7 +11,7 @@
 class SlideInfo
 {
 public:
-    SlideInfo(int a=10);
+    SlideInfo(int a=100);
     bool checkWhetherSlide(_ip_header*,SnifferData &,QByteArray &);
     bool complete;            // is get all packets to rebuild info
     QByteArray rebuildByteData;
