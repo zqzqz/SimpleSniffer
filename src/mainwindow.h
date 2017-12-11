@@ -5,8 +5,9 @@
 #include "sniffer.h"
 #include <unistd.h>
 #include "capturethread.h"
-#include "QtWidgets/QMessageBox"
-#include "QtWidgets/QFileDialog"
+//#include "QtWidgets/QMessageBox"
+//#include "QtWidgets/QFileDialog"
+#include <QFileDialog>
 #include "multiview.h"
 #include "filter.h"
 #include "ui_mainwindow.h"
