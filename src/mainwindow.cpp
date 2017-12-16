@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -50,6 +51,11 @@ MainWindow::~MainWindow()
  */
 void MainWindow::on_start_clicked()
 {
+    if (setuid(0) < 0)
+    {
+       QMessageBox::information(NULL, tr("tips"), tr("Please Start use root rigth"), QMessageBox::Yes);
+       return;
+    }
     if (! snifferStatus) {
         snifferStatus = true;
         view->clearData();

@@ -127,7 +127,7 @@ void FileDialog::displayFile()
         model->setItem(index, 0, item);
         item = new QStandardItem(it->first.right(it->first.size() - it->first.indexOf(":") - 1));
         model->setItem(index, 1, item);
-        item = new QStandardItem(tr("unknown"));
+        item = new QStandardItem(QString::number(it->second.size()*2+1,10)+QObject::tr("KB"));
         model->setItem(index, 2, item);
         item = new QStandardItem(QString::number(it->second.size(), 10));
         model->setItem(index, 3, item);
