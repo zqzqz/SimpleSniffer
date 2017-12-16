@@ -161,7 +161,7 @@ void CaptureThread::run()
 
                 if(pslideInfo->complete) {
                     LOG("rebuild a full packet");
-                    iph->flags_fo=0x0000;//pass
+
                     tmpSnifferData.strProto+="(Rebuild)";
                     QByteArray tmpHeaderByteData;
                     tmpHeaderByteData.clear();
@@ -174,6 +174,7 @@ void CaptureThread::run()
                     //LOG(tmpSnifferData.strData.size());
                     tmpSnifferData.strData.append(pslideInfo->rebuildByteData);
                     iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
+                    iph->flags_fo=0x0000;//pass
                     tmpSnifferData.protoInfo.pip = (void*) iph;
 
                     unsigned int rebuildLength;
