@@ -111,6 +111,7 @@ void CaptureThread::run()
 
         _eth_header   *eth; //ethernet
         _ip_header    *iph;
+        _ipv6_header  *iph6;
         _arp_header   *arph;
         _tcp_header   *tcph;
         _udp_header   *udph;
@@ -133,60 +134,71 @@ void CaptureThread::run()
         //Second get ip header
 
 /********************************************IP begin****************************************/
-       if(htons(eth->eth_type)==2048) {     //there is somthing wrong about this sentence
+       if(htons(eth->eth_type)==2048 || htons(eth->eth_type)==34525) {     //there is somthing wrong about this sentence
 
             LOG("it is IP packet");
 
-            flag=1;
+            if (htons(eth->eth_type)==2048) {
+                flag=1;
 
-            iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
-            //iph=new _ip_header();
-            //memcpy(iph, sniffer->pktData+14, sizeof(_ip_header));
-            tmpSnifferData.protoInfo.pip = (void*) iph;
-            tmpSnifferData.protoInfo.ipFlag = EPT_IP;
+                iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
+                //iph=new _ip_header();
+                //memcpy(iph, sniffer->pktData+14, sizeof(_ip_header));
+                tmpSnifferData.protoInfo.pip = (void*) iph;
+                tmpSnifferData.protoInfo.ipFlag = EPT_IP;
 
-            //get length of ip header
-            ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
-            sip = iph->saddr;
-            dip = iph->daddr;
+                //get length of ip header
+                ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
+                sip = iph->saddr;
+                dip = iph->daddr;
 
-            //above:finished processing ip header
-/**************************************ip slide and rebuild*************************************/
+                //above:finished processing ip header
+    /**************************************ip slide and rebuild*************************************/
 
-            if(!pslideInfo->checkWhetherSlide(iph,tmpSnifferData,rawByteData)) {
-                LOG("in if");
-                //pass,don't fragment
-            } else {
-                LOG("get a slide of ip packet!!!!!!!!!!!!!!!!!");
-
-                if(pslideInfo->complete) {
-                    LOG("rebuild a full packet");
-
-                    tmpSnifferData.strProto+="(Rebuild)";
-                    QByteArray tmpHeaderByteData;
-                    tmpHeaderByteData.clear();
-
-                    tmpHeaderByteData.setRawData((const char*)sniffer->pktData,14+ip_lenth);
-                    //tmpSnifferData.strData.clear();
-                    //tmpSnifferData.strData="raw capture data:";
-                    //LOG(tmpSnifferData.strData.size());
-                    tmpSnifferData.strData=(tmpHeaderByteData);
-                    //LOG(tmpSnifferData.strData.size());
-                    tmpSnifferData.strData.append(pslideInfo->rebuildByteData);
-                    iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
-                    iph->flags_fo=0x0000;//pass
-                    tmpSnifferData.protoInfo.pip = (void*) iph;
-
-                    unsigned int rebuildLength;
-                    char            rebuildSizeLength[6];
-                    rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength+14;
-                    iph->tlen=htons((short)(ip_lenth+pslideInfo->rebuildTotalLength));
-                    sprintf(rebuildSizeLength,"%d",rebuildLength);
-                    tmpSnifferData.strLength=rebuildSizeLength;
-                    //tmpSnifferData.protoInfo.pip =  pslideInfo->preheader;
+                if(!pslideInfo->checkWhetherSlide(iph,tmpSnifferData,rawByteData)) {
+                    LOG("in if");
+                    //pass,don't fragment
                 } else {
-                    continue; //can't form an intact ip packet
+                    LOG("get a slide of ip packet!!!!!!!!!!!!!!!!!");
+
+                    if(pslideInfo->complete) {
+                        LOG("rebuild a full packet");
+
+                        tmpSnifferData.strProto+="(Rebuild)";
+                        QByteArray tmpHeaderByteData;
+                        tmpHeaderByteData.clear();
+
+                        tmpHeaderByteData.setRawData((const char*)sniffer->pktData,14+ip_lenth);
+                        //tmpSnifferData.strData.clear();
+                        //tmpSnifferData.strData="raw capture data:";
+                        //LOG(tmpSnifferData.strData.size());
+                        tmpSnifferData.strData=(tmpHeaderByteData);
+                        //LOG(tmpSnifferData.strData.size());
+                        tmpSnifferData.strData.append(pslideInfo->rebuildByteData);
+                        iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
+                        iph->flags_fo=0x0000;//pass
+                        tmpSnifferData.protoInfo.pip = (void*) iph;
+
+                        unsigned int rebuildLength;
+                        char            rebuildSizeLength[6];
+                        rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength+14;
+                        iph->tlen=htons((short)(ip_lenth+pslideInfo->rebuildTotalLength));
+                        sprintf(rebuildSizeLength,"%d",rebuildLength);
+                        tmpSnifferData.strLength=rebuildSizeLength;
+                        //tmpSnifferData.protoInfo.pip =  pslideInfo->preheader;
+                    } else {
+                        continue; //can't form an intact ip packet
+                    }
                 }
+            }
+            // ipv6
+            else if (htons(eth->eth_type)==34525) {
+                iph6 = (_ipv6_header*) (tmpSnifferData.strData.data()+14);
+                iph->proto = -1;
+                tmpSnifferData.protoInfo.ipFlag = EPT_IP6;
+                tmpSnifferData.protoInfo.pip = (void*) iph6;
+                sip = iph6->saddr;
+                dip = iph6->daddr;
             }
 
 /**************************************higher protocol on ip************************************/
@@ -321,9 +333,15 @@ void CaptureThread::run()
         } else {
             LOG("unknown proto");
         }
-        char strsip[24], strdip[24];
-        sprintf(strsip,"%d.%d.%d.%d",sip[0],sip[1],sip[2],sip[3]);
-        sprintf(strdip,"%d.%d.%d.%d",dip[0],dip[1],dip[2],dip[3]);
+        char strsip[40], strdip[40];
+        if (htons(eth->eth_type)==34525) {
+            sprintf(strsip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", sip[0],sip[1],sip[2],sip[3],sip[4],sip[5],sip[6],sip[7]);
+            sprintf(strdip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", dip[0],dip[1],dip[2],dip[3],dip[4],dip[5],dip[6],dip[7]);
+        }
+        else {
+            sprintf(strsip,"%d.%d.%d.%d",sip[0],sip[1],sip[2],sip[3]);
+            sprintf(strdip,"%d.%d.%d.%d",dip[0],dip[1],dip[2],dip[3]);
+        }
         tmpSnifferData.strSIP=strsip;
         tmpSnifferData.strSIP=tmpSnifferData.strSIP+":"+QString::number(sport,10);
         tmpSnifferData.strDIP=strdip;

@@ -82,6 +82,11 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         break;
     }
+    case(EPT_IP6): {
+        itemChild = new QStandardItem(QObject::tr("Ethernet Type: IPV6 (0x86dd)"));
+        item->appendRow(itemChild);
+        break;
+    }
     default: return;
     }
 
@@ -207,6 +212,31 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         itemChild = new QStandardItem(QObject::tr("Target IP Adress: ")+dip);
         item->appendRow(itemChild);
     }
+    case(EPT_IP6): {
+        item = new QStandardItem(QObject::tr("Internet Protocol (IPv6)"));
+        treeModel->setItem(1, item);
+        index = treeModel->item(1)->index();
+        //treeView->setExpanded(index, true);
+
+        _ipv6_header* iph6 = (_ipv6_header*) snifferData.protoInfo.pip;
+        itemChild = new QStandardItem(QObject::tr("Version: ")+QString::number(iph6->version, 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Traffic Class: ")+QString::number(iph6->traffic, 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Flow Label: 0x")+QString::number(ntohl(iph6->flow), 16));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Payload Length: ")+QString::number(ntohs(iph6->pay_length), 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Next Header: 0x")+QString::number(iph6->next_h, 16));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Hop Limit: ")+QString::number(iph6->hop_limit, 10));
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Source: ")+sip);
+        item->appendRow(itemChild);
+        itemChild = new QStandardItem(QObject::tr("Destination: ")+dip);
+        item->appendRow(itemChild);
+        break;
+    }
     default: return;
     }
     /**********************  transmission layer end ***********************/
@@ -232,7 +262,6 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemSub = new QStandardItem(QObject::tr("Flags"));
         item->appendRow(itemSub);
-        treeView->setExpanded(itemSub->index(), true);
         itemChild = new QStandardItem(QObject::tr("Reserved: ")+QString::number((tcph->thl & 0x0E)/2, 10));
         itemSub->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Nonce: ")+QString::number((tcph->thl & 0x01), 10));
