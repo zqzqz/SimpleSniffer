@@ -367,8 +367,6 @@ int CaptureThread::takeOnePacket(pcap_pkthdr *header, const u_char *pktData)
     if (flag==1&&bstop==false) {
         view->addPacketItem(tmpSnifferData, true, filter->launchOneFilter(tmpSnifferData));
         NO++;
-        //save packet to file
-        sniffer->saveCaptureData(header, pktData);
     }
 
     if (bstop) sniffer->closeDumpFile();

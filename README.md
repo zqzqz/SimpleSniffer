@@ -8,7 +8,6 @@
 
 ## Comments
 Please do not push sniffer.pro.user anymore. Conflicts will happen.
-Existing bug: When repeatly press start and stop without any packets captured, the code crashes at Csniffer::capture() sometimes.
 
 ## Code Structure
 * NetworkChoice(Dialog) -- Sniffer
