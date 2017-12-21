@@ -37,24 +37,33 @@ bool CaptureThread::getCondition()
     return bstop;
 }
 
+int CaptureThread::loadFromOfflineFile(QString filename)
+{
+    LOG(filename.toLatin1().data());
+    view->clearData();
+    if(! filename.isEmpty()) {
+        if(sniffer->openOfflineFile((const char*)filename.toLocal8Bit())) {
+            LOG("successfully open offline file");
+        }
+        else {
+            LOG("Failed to open offline file");
+            return 0;
+        }
+    }
+    int res;
+    NO = 1;
+    while (true) {
+        res = sniffer->loadFromFile();
+        if (res>0) takeOnePacket(sniffer->header, sniffer->pktData);
+        else break;
+    }
+    return 1;
+}
+
+
 void CaptureThread::run()
 {   //open net device && capture packet && save
-
-    int res;//save the result of catth packet
-
-    QByteArray      rawByteData;
-    int             num=1;
-    bool fileFlag; // whether the packet my contain file data
-    char            sizeNum[10];
-    char            sizeLength[6];
-    time_t          local_tv_sec;
-    struct          tm* ltime;   //tm defined in time.h
-    char            timestr[16];
-
-    //int             whetherFragment=0;
-
-    //open net device
-
+    view->clearData();
     if(!sniffer->openNetDevInSniffer()) {
         LOG("error:there is no device abailable");
         //exit(1);
@@ -71,296 +80,297 @@ void CaptureThread::run()
             LOG("Failed to open file");
         }
     }
+    int res;
+    NO = 1;
+    while (! bstop) {
+        res = sniffer->captureOnce();
+        if (res>0) takeOnePacket(sniffer->header, sniffer->pktData);
+    }
+}
+
+int CaptureThread::takeOnePacket(pcap_pkthdr *header, const u_char *pktData)
+{
+    QByteArray      rawByteData;
+    bool fileFlag; // whether the packet my contain file data
+    char            sizeLength[6];
+    time_t          local_tv_sec;
+    struct          tm* ltime;   //tm defined in time.h
+    char            timestr[16];
 
     pslideInfo=new SlideInfo;
 
-    while (bstop!=true &&(res=sniffer->captureOnce())>=0) {
-        //msleep(1);
-        SnifferData tmpSnifferData;
-        fileFlag = false;
-        tmpSnifferData.protoInfo.strSendInfo = QByteArray("");
-        // out of time,wait for packet
-        if(res==0) {
-            LOG("wait for packet");
-            continue;
-        }
-        //
+    SnifferData tmpSnifferData;
+    fileFlag = false;
+    tmpSnifferData.protoInfo.strSendInfo = QByteArray("");
 
-        LOG("start capture");
+    rawByteData.clear();
+    rawByteData.setRawData((const char*)pktData,header->caplen);  //save packet to qbytearray
 
-        sniffer->saveCaptureData();   //write raw info to the file named filename
+    tmpSnifferData.strData=rawByteData;
 
-        rawByteData.clear();
-        rawByteData.setRawData((const char*)sniffer->pktData,sniffer->header->caplen);  //save packet to qbytearray
+    local_tv_sec=header->ts.tv_sec;  //seconds since 1900
+    ltime=localtime(&local_tv_sec); //get local time
+    strftime(timestr,sizeof(timestr),"%H:%M:%S", ltime);
 
-        tmpSnifferData.strData=rawByteData;
+    tmpSnifferData.strTime=timestr;
 
-        local_tv_sec=sniffer->header->ts.tv_sec;  //seconds since 1900
-        ltime=localtime(&local_tv_sec); //get local time
-        strftime(timestr,sizeof(timestr),"%H:%M:%S", ltime);
+    sprintf(sizeLength,"%d",header->len);
+    tmpSnifferData.strLength=sizeLength;
 
-        tmpSnifferData.strTime=timestr;
+    /*above:just write the packet to file,without analyze
+     *
+     * then:begin to analyze packet
+     */
 
-        sprintf(sizeLength,"%d",sniffer->header->len);
-        tmpSnifferData.strLength=sizeLength;
+    _eth_header   *eth; //ethernet
+    _ip_header    *iph;
+    _ipv6_header  *iph6;
+    _arp_header   *arph;
+    _tcp_header   *tcph;
+    _udp_header   *udph;
+    _icmp_header  *icmph;
+    _igmp_header  *igmph;
 
-        /*above:just write the packet to file,without analyze
-         *
-         * then:begin to analyze packet
-         */
+    int flag;
+    flag=0;
 
-        _eth_header   *eth; //ethernet
-        _ip_header    *iph;
-        _ipv6_header  *iph6;
-        _arp_header   *arph;
-        _tcp_header   *tcph;
-        _udp_header   *udph;
-        _icmp_header  *icmph;
-        _igmp_header  *igmph;
+    unsigned short sport=0,dport=0;
+    unsigned char* sip;
+    unsigned char* dip;
+    unsigned int ip_lenth;
+    //QString  rebuildInfo;
+    //rebuildInfo="";
 
-        int flag;
-        flag=0;
-
-        unsigned short sport=0,dport=0;
-        unsigned char* sip;
-        unsigned char* dip;
-        unsigned int ip_lenth;
-        //QString  rebuildInfo;
-        //rebuildInfo="";
-
-        //First get Mac header
-        eth = (_eth_header*) tmpSnifferData.strData.data();
-        tmpSnifferData.protoInfo.peth = (void*) eth;
-        //Second get ip header
+    //First get Mac header
+    eth = (_eth_header*) tmpSnifferData.strData.data();
+    tmpSnifferData.protoInfo.peth = (void*) eth;
+    //Second get ip header
 
 /********************************************IP begin****************************************/
-       if(htons(eth->eth_type)==2048 || htons(eth->eth_type)==34525) {     //there is somthing wrong about this sentence
+   if(htons(eth->eth_type)==2048 || htons(eth->eth_type)==34525) {     //there is somthing wrong about this sentence
 
-            LOG("it is IP packet");
+        LOG("it is IP packet");
 
-            if (htons(eth->eth_type)==2048) {
-                flag=1;
+        if (htons(eth->eth_type)==2048) {
+            flag=1;
 
-                iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
-                //iph=new _ip_header();
-                //memcpy(iph, sniffer->pktData+14, sizeof(_ip_header));
-                tmpSnifferData.protoInfo.pip = (void*) iph;
-                tmpSnifferData.protoInfo.ipFlag = EPT_IP;
+            iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
+            //iph=new _ip_header();
+            //memcpy(iph, pktData+14, sizeof(_ip_header));
+            tmpSnifferData.protoInfo.pip = (void*) iph;
+            tmpSnifferData.protoInfo.ipFlag = EPT_IP;
 
-                //get length of ip header
-                ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
-                sip = iph->saddr;
-                dip = iph->daddr;
+            //get length of ip header
+            ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
+            sip = iph->saddr;
+            dip = iph->daddr;
 
-                //above:finished processing ip header
-    /**************************************ip slide and rebuild*************************************/
+            //above:finished processing ip header
+/**************************************ip slide and rebuild*************************************/
 
-                if(!pslideInfo->checkWhetherSlide(iph,tmpSnifferData,rawByteData)) {
-                    LOG("in if");
-                    //pass,don't fragment
+            if(!pslideInfo->checkWhetherSlide(iph,tmpSnifferData,rawByteData)) {
+                //pass,don't fragment
+            } else {
+                LOG("get a slide of ip packet!!!!!!!!!!!!!!!!!");
+
+                if(pslideInfo->complete) {
+                    LOG("rebuild a full packet");
+
+                    tmpSnifferData.strProto+="(Rebuild)";
+                    QByteArray tmpHeaderByteData;
+                    tmpHeaderByteData.clear();
+
+                    tmpHeaderByteData.setRawData((const char*)pktData,14+ip_lenth);
+                    //tmpSnifferData.strData.clear();
+                    //tmpSnifferData.strData="raw capture data:";
+                    //LOG(tmpSnifferData.strData.size());
+                    tmpSnifferData.strData=(tmpHeaderByteData);
+                    //LOG(tmpSnifferData.strData.size());
+                    tmpSnifferData.strData.append(pslideInfo->rebuildByteData);
+                    iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
+                    iph->flags_fo=0x0000;//pass
+                    tmpSnifferData.protoInfo.pip = (void*) iph;
+
+                    unsigned int rebuildLength;
+                    char            rebuildSizeLength[6];
+                    rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength+14;
+                    iph->tlen=htons((short)(ip_lenth+pslideInfo->rebuildTotalLength));
+                    sprintf(rebuildSizeLength,"%d",rebuildLength);
+                    tmpSnifferData.strLength=rebuildSizeLength;
+                    //tmpSnifferData.protoInfo.pip =  pslideInfo->preheader;
                 } else {
-                    LOG("get a slide of ip packet!!!!!!!!!!!!!!!!!");
-
-                    if(pslideInfo->complete) {
-                        LOG("rebuild a full packet");
-
-                        tmpSnifferData.strProto+="(Rebuild)";
-                        QByteArray tmpHeaderByteData;
-                        tmpHeaderByteData.clear();
-
-                        tmpHeaderByteData.setRawData((const char*)sniffer->pktData,14+ip_lenth);
-                        //tmpSnifferData.strData.clear();
-                        //tmpSnifferData.strData="raw capture data:";
-                        //LOG(tmpSnifferData.strData.size());
-                        tmpSnifferData.strData=(tmpHeaderByteData);
-                        //LOG(tmpSnifferData.strData.size());
-                        tmpSnifferData.strData.append(pslideInfo->rebuildByteData);
-                        iph = (_ip_header*) (tmpSnifferData.strData.data()+14);
-                        iph->flags_fo=0x0000;//pass
-                        tmpSnifferData.protoInfo.pip = (void*) iph;
-
-                        unsigned int rebuildLength;
-                        char            rebuildSizeLength[6];
-                        rebuildLength=ip_lenth+pslideInfo->rebuildTotalLength+14;
-                        iph->tlen=htons((short)(ip_lenth+pslideInfo->rebuildTotalLength));
-                        sprintf(rebuildSizeLength,"%d",rebuildLength);
-                        tmpSnifferData.strLength=rebuildSizeLength;
-                        //tmpSnifferData.protoInfo.pip =  pslideInfo->preheader;
-                    } else {
-                        continue; //can't form an intact ip packet
-                    }
+                    return 1; //can't form an intact ip packet
                 }
             }
-            // ipv6
-            else if (htons(eth->eth_type)==34525) {
-                iph6 = (_ipv6_header*) (tmpSnifferData.strData.data()+14);
-                iph->proto = -1;
-                tmpSnifferData.protoInfo.ipFlag = EPT_IP6;
-                tmpSnifferData.protoInfo.pip = (void*) iph6;
-                sip = iph6->saddr;
-                dip = iph6->daddr;
-            }
-
+        }
+        // ipv6
+        else if (htons(eth->eth_type)==34525) {
+            iph6 = (_ipv6_header*) (tmpSnifferData.strData.data()+14);
+            tmpSnifferData.protoInfo.ipFlag = EPT_IP6;
+            tmpSnifferData.protoInfo.pip = (void*) iph6;
+            sip = iph6->saddr;
+            dip = iph6->daddr;
+            return 0;
+        }
 /**************************************higher protocol on ip************************************/
-            switch(iph->proto) {
-            case TCP_SIG:
-                if(!pslideInfo->complete) {
-                    tcph = (_tcp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
-                } else {
-                    tcph = (_tcp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
-                    //tcph=new _tcp_header();
-                    //memcpy(tcph, pslideInfo->rebuildByteData.data(), sizeof(_tcp_header));
-                }
-                tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
-                tmpSnifferData.protoInfo.ptcp = (void*) tcph;
-                tmpSnifferData.protoInfo.ipProto = QObject::tr("TCP");
-                tmpSnifferData.strProto += "TCP";
+        switch(iph->proto) {
+        case TCP_SIG:
+            if(!pslideInfo->complete) {
+                tcph = (_tcp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
+            } else {
+                tcph = (_tcp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
+                //tcph=new _tcp_header();
+                //memcpy(tcph, pslideInfo->rebuildByteData.data(), sizeof(_tcp_header));
+            }
+            tmpSnifferData.protoInfo.tcpFlag = TCP_SIG;
+            tmpSnifferData.protoInfo.ptcp = (void*) tcph;
+            tmpSnifferData.protoInfo.ipProto = QObject::tr("TCP");
+            tmpSnifferData.strProto += "TCP";
 
-                sport=ntohs(tcph->sport);
-                dport=ntohs(tcph->dport);
+            sport=ntohs(tcph->sport);
+            dport=ntohs(tcph->dport);
 
 
 /**************************************tcp high protocol begin**********************************/
-                if(sport==FTP_PORT||dport==FTP_PORT) {
-                    tmpSnifferData.strProto+="(FTP)";
-                    tmpSnifferData.protoInfo.appFlag = FTP_PORT;
-                } else if (sport ==SMTP_PORT||dport==SMTP_PORT) {
-                    tmpSnifferData.strProto+="(SMTP)";
-                    tmpSnifferData.protoInfo.appFlag = SMTP_PORT;
-                } else if (sport ==TELNET_PORT||dport==TELNET_PORT) {
-                    tmpSnifferData.strProto+="(TELNET)";
-                    tmpSnifferData.protoInfo.appFlag = TELNET_PORT;
-                } else if(sport==POP3_PORT||dport==POP3_PORT) {
-                    tmpSnifferData.strProto+="(POP3)";
-                    tmpSnifferData.protoInfo.appFlag = POP3_PORT;
-                } else if (sport == HTTPS_PORT || dport == HTTPS_PORT) {
-                    tmpSnifferData.strProto += "(HTTPS)";
-                    tmpSnifferData.protoInfo.appFlag+= HTTPS_PORT;
-                } else if (sport == HTTP_PORT || dport == HTTP_PORT ||
-                         sport == HTTP2_PORT || dport == HTTP2_PORT) {
-                    tmpSnifferData.strProto += "(HTTP)";
-                    tmpSnifferData.protoInfo.appFlag = HTTP_PORT;
-                } else {
-                    tmpSnifferData.protoInfo.appFlag = 0;
-                }
-                fileFlag = true;
-                tmpSnifferData.protoInfo.strSendInfo = rawByteData.remove(0, 54);
-                break;
-
-            case UDP_SIG:
-                tmpSnifferData.strProto="UDP";
-                tmpSnifferData.strProtoForShow="User Datagram Protocol";
-
-                if(!pslideInfo->complete) {
-                    udph = (_udp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
-                } else {
-                    udph = (_udp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
-                    //udph=new _udp_header();
-                    //memcpy(udph, pslideInfo->rebuildheader.data(), sizeof(_udp_header));
-                }
-                tmpSnifferData.protoInfo.tcpFlag = UDP_SIG;
-                tmpSnifferData.protoInfo.ptcp = (void*) udph;
-                tmpSnifferData.protoInfo.ipProto = QObject::tr("UDP");
-
-                sport=ntohs(udph->sport);
-                dport=ntohs(udph->dport);
-
-                if (sport == DNS_PORT || dport == DNS_PORT) {
-                    tmpSnifferData.strProto += "(DNS)";
-                    tmpSnifferData.protoInfo.appFlag = DNS_PORT;
-                } else if (sport == SNMP_PORT || dport == SNMP_PORT) {
-                    tmpSnifferData.strProto += "(SNMP)";
-                    tmpSnifferData.protoInfo.appFlag = SNMP_PORT;
-                } else {
-                    tmpSnifferData.protoInfo.appFlag = 0;
-                }
-                break;
-
-            case ICMP_SIG:
-                tmpSnifferData.strProto+="ICMP";
-
-                LOG("ICMP");
-                if(!pslideInfo->complete) {
-                    icmph = (_icmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
-                } else {
-                    icmph = (_icmp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
-                    //LOG("locate");
-                    //icmph=new _icmp_header();
-                    //memcpy(icmph,(tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4, sizeof(_icmp_header));
-                }
-                tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
-                tmpSnifferData.protoInfo.ptcp = (void*) icmph;
-                tmpSnifferData.protoInfo.ipProto = QObject::tr("ICMP");
-                break;
-            case IGMP_SIG:
-                tmpSnifferData.strProto="IGMP";
-
-                igmph=new _igmp_header();
-                if(!pslideInfo->complete) {
-                    igmph = (_igmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
-                } else {
-                    igmph = (_igmp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
-                    //igmph=new _igmp_header();
-                    //memcpy(igmph,(pslideInfo->rebuildByteData.data()), sizeof(_igmp_header));
-                }
-                tmpSnifferData.protoInfo.tcpFlag = IGMP_SIG;
-                tmpSnifferData.protoInfo.ptcp = (void*) igmph;
-                tmpSnifferData.protoInfo.ipProto = QObject::tr("IGMP");
-                break;
-            default:
-                LOG("Nothing captured!!!");
-                continue;
+            if(sport==FTP_PORT||dport==FTP_PORT) {
+                tmpSnifferData.strProto+="(FTP)";
+                tmpSnifferData.protoInfo.appFlag = FTP_PORT;
+            } else if (sport ==SMTP_PORT||dport==SMTP_PORT) {
+                tmpSnifferData.strProto+="(SMTP)";
+                tmpSnifferData.protoInfo.appFlag = SMTP_PORT;
+            } else if (sport ==TELNET_PORT||dport==TELNET_PORT) {
+                tmpSnifferData.strProto+="(TELNET)";
+                tmpSnifferData.protoInfo.appFlag = TELNET_PORT;
+            } else if(sport==POP3_PORT||dport==POP3_PORT) {
+                tmpSnifferData.strProto+="(POP3)";
+                tmpSnifferData.protoInfo.appFlag = POP3_PORT;
+            } else if (sport == HTTPS_PORT || dport == HTTPS_PORT) {
+                tmpSnifferData.strProto += "(HTTPS)";
+                tmpSnifferData.protoInfo.appFlag+= HTTPS_PORT;
+            } else if (sport == HTTP_PORT || dport == HTTP_PORT ||
+                     sport == HTTP2_PORT || dport == HTTP2_PORT) {
+                tmpSnifferData.strProto += "(HTTP)";
+                tmpSnifferData.protoInfo.appFlag = HTTP_PORT;
+            } else {
+                tmpSnifferData.protoInfo.appFlag = 0;
             }
+            fileFlag = true;
+            tmpSnifferData.protoInfo.strSendInfo = rawByteData.remove(0, 54);
+            break;
 
-       }else if(htons(eth->eth_type)==2054) {
+        case UDP_SIG:
+            tmpSnifferData.strProto="UDP";
+            tmpSnifferData.strProtoForShow="User Datagram Protocol";
 
+            if(!pslideInfo->complete) {
+                udph = (_udp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
+            } else {
+                udph = (_udp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
+                //udph=new _udp_header();
+                //memcpy(udph, pslideInfo->rebuildheader.data(), sizeof(_udp_header));
+            }
+            tmpSnifferData.protoInfo.tcpFlag = UDP_SIG;
+            tmpSnifferData.protoInfo.ptcp = (void*) udph;
+            tmpSnifferData.protoInfo.ipProto = QObject::tr("UDP");
 
-            LOG("it is arp packet")
+            sport=ntohs(udph->sport);
+            dport=ntohs(udph->dport);
 
-            flag=1;
+            if (sport == DNS_PORT || dport == DNS_PORT) {
+                tmpSnifferData.strProto += "(DNS)";
+                tmpSnifferData.protoInfo.appFlag = DNS_PORT;
+            } else if (sport == SNMP_PORT || dport == SNMP_PORT) {
+                tmpSnifferData.strProto += "(SNMP)";
+                tmpSnifferData.protoInfo.appFlag = SNMP_PORT;
+            } else {
+                tmpSnifferData.protoInfo.appFlag = 0;
+            }
+            break;
 
-            tmpSnifferData.strProto="ARP";
-            //get arp protocol header
+        case ICMP_SIG:
+            tmpSnifferData.strProto+="ICMP";
 
-            arph = (_arp_header*) (tmpSnifferData.strData.data()+14);
-            tmpSnifferData.protoInfo.ipFlag = EPT_ARP;
-            tmpSnifferData.protoInfo.pip = (void*) arph;
+            LOG("ICMP");
+            if(!pslideInfo->complete) {
+                icmph = (_icmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
+            } else {
+                icmph = (_icmp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
+                //LOG("locate");
+                //icmph=new _icmp_header();
+                //memcpy(icmph,(tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4, sizeof(_icmp_header));
+            }
+            tmpSnifferData.protoInfo.tcpFlag = ICMP_SIG;
+            tmpSnifferData.protoInfo.ptcp = (void*) icmph;
+            tmpSnifferData.protoInfo.ipProto = QObject::tr("ICMP");
+            break;
+        case IGMP_SIG:
+            tmpSnifferData.strProto="IGMP";
 
-            sip = arph->arp_spa;
-            dip = arph->arp_tpa;
-
-
-        } else {
-            LOG("unknown proto");
+            igmph=new _igmp_header();
+            if(!pslideInfo->complete) {
+                igmph = (_igmp_header*) (tmpSnifferData.strData.data()+14+ip_lenth);
+            } else {
+                igmph = (_igmp_header*) ((tmpSnifferData.strData.data())+14+(iph->ver_ihl & 0x0F)*4);
+                //igmph=new _igmp_header();
+                //memcpy(igmph,(pslideInfo->rebuildByteData.data()), sizeof(_igmp_header));
+            }
+            tmpSnifferData.protoInfo.tcpFlag = IGMP_SIG;
+            tmpSnifferData.protoInfo.ptcp = (void*) igmph;
+            tmpSnifferData.protoInfo.ipProto = QObject::tr("IGMP");
+            break;
+        default:
+            LOG("Nothing captured!!!");
+            return 1;
         }
-        char strsip[40], strdip[40];
-        if (htons(eth->eth_type)==34525) {
-            sprintf(strsip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", sip[0],sip[1],sip[2],sip[3],sip[4],sip[5],sip[6],sip[7]);
-            sprintf(strdip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", dip[0],dip[1],dip[2],dip[3],dip[4],dip[5],dip[6],dip[7]);
-        }
-        else {
-            sprintf(strsip,"%d.%d.%d.%d",sip[0],sip[1],sip[2],sip[3]);
-            sprintf(strdip,"%d.%d.%d.%d",dip[0],dip[1],dip[2],dip[3]);
-        }
-        tmpSnifferData.strSIP=strsip;
-        tmpSnifferData.strSIP=tmpSnifferData.strSIP+":"+QString::number(sport,10);
-        tmpSnifferData.strDIP=strdip;
-        tmpSnifferData.strDIP=tmpSnifferData.strDIP+":"+QString::number(dport,10);
 
-        if (fileFlag && tmpSnifferData.protoInfo.strSendInfo.size()>100) {
-            view->addFilePacket(tmpSnifferData.strSIP+tmpSnifferData.strDIP, ntohl(tcph->seq_no), num-1);
-        }
+   }else if(htons(eth->eth_type)==2054) {
 
 
-        if (flag==1&&bstop==false) {
-            sprintf(sizeNum,"%d",num);
-            tmpSnifferData.strNum=sizeNum;   //strNum is the sequence number of the packet
-            view->addPacketItem(tmpSnifferData, true, filter->launchOneFilter(tmpSnifferData));
-            num++;
+        LOG("it is arp packet")
 
-        }
+        flag=1;
 
+        tmpSnifferData.strProto="ARP";
+        //get arp protocol header
 
+        arph = (_arp_header*) (tmpSnifferData.strData.data()+14);
+        tmpSnifferData.protoInfo.ipFlag = EPT_ARP;
+        tmpSnifferData.protoInfo.pip = (void*) arph;
+
+        sip = arph->arp_spa;
+        dip = arph->arp_tpa;
+
+    } else {
+        LOG("unknown proto");
+        return 1;
     }
-    delete pslideInfo;
+    char strsip[40], strdip[40];
+    if (htons(eth->eth_type)==34525) {
+        sprintf(strsip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", sip[0],sip[1],sip[2],sip[3],sip[4],sip[5],sip[6],sip[7]);
+        sprintf(strdip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", dip[0],dip[1],dip[2],dip[3],dip[4],dip[5],dip[6],dip[7]);
+    }
+    else {
+        sprintf(strsip,"%d.%d.%d.%d",sip[0],sip[1],sip[2],sip[3]);
+        sprintf(strdip,"%d.%d.%d.%d",dip[0],dip[1],dip[2],dip[3]);
+    }
+    tmpSnifferData.strSIP=strsip;
+    tmpSnifferData.strSIP=tmpSnifferData.strSIP+":"+QString::number(sport,10);
+    tmpSnifferData.strDIP=strdip;
+    tmpSnifferData.strDIP=tmpSnifferData.strDIP+":"+QString::number(dport,10);
+    tmpSnifferData.strNum = QString::number(NO,10);
+
+    if (fileFlag && tmpSnifferData.protoInfo.strSendInfo.size()>100) {
+        view->addFilePacket(tmpSnifferData.strSIP+tmpSnifferData.strDIP, ntohl(tcph->seq_no), NO-1);
+    }
+
+
+    if (flag==1&&bstop==false) {
+        view->addPacketItem(tmpSnifferData, true, filter->launchOneFilter(tmpSnifferData));
+        NO++;
+        //save packet to file
+        sniffer->saveCaptureData(header, pktData);
+    }
+
+    if (bstop) sniffer->closeDumpFile();
+    return 0;
 }

@@ -84,6 +84,11 @@ int Csniffer::capture() {
     return captureResult;
 }
 
+int Csniffer::loadFromFile() {
+    int captureResult = pcap_next_ex(pHandle, &header, &pktData);
+    return captureResult;
+}
+
 bool Csniffer::openDumpFile(const char *fileName) {
     if (pDumpFile !=NULL) {
         closeDumpFile();
@@ -97,9 +102,24 @@ bool Csniffer::openDumpFile(const char *fileName) {
     return false;
 }
 
-bool Csniffer::saveCaptureData() {
+bool Csniffer::openOfflineFile(const char *fileName) {
+    if (pDumpFile !=NULL) {
+        closeDumpFile();
+    }
+    if ((pHandle = pcap_open_offline(fileName, err)) != NULL) {
+        return true;
+    }
+    else {
+        LOG(pcap_geterr(pHandle));
+    }
+    return false;
+}
+
+bool Csniffer::saveCaptureData(struct pcap_pkthdr *cheader, const u_char *cpktData) {
+    if (cheader == NULL) cheader = header;
+    if (cpktData == NULL) cpktData = pktData;
     if (pDumpFile != NULL) {
-        pcap_dump((unsigned char *)pDumpFile, header, pktData);
+        pcap_dump((unsigned char *)pDumpFile, cheader, cpktData);
         return true;
     }
     return false;

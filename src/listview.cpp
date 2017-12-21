@@ -41,9 +41,10 @@ ListView::~ListView()
  */
 void ListView::clearData()
 {
-    packets.clear();
-    status.clear();
-    fileFlow.clear();
+    if(status.size()>0) status.clear();
+    if(fileFlow.size()>0) fileFlow.clear();
+    if(packets.size()>0) packets.clear();
+
     index = 0;
     rebuildInfo();
 }
