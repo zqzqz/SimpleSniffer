@@ -19,6 +19,8 @@ public:
     CaptureThread(Sniffer *psniffer, QString filename, MultiView *view, Filter *filter);
     void stop();
     void run();
+    int loadFromOfflineFile(QString filename);
+    int takeOnePacket(struct pcap_pkthdr *header, const u_char *pktData);
     void setCondition();
     bool getCondition();
 private:
@@ -27,6 +29,7 @@ private:
     QString filename;
     MultiView *view;
     Filter *filter;
+    int NO;
     //SlideInfo *pslideInfo;
     SlideInfo *pslideInfo;
 };

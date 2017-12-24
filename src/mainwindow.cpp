@@ -58,20 +58,17 @@ void MainWindow::on_start_clicked()
     }
     if (! snifferStatus) {
         snifferStatus = true;
-        view->clearData();
         //ui->start->setText(tr("Stop"));
         ui->start->setIcon(QIcon(":/resource/button/stop.png"));
         ui->start->setToolTip(tr("Stop (Ctrl+S)"));
 
         /* save to tmpfile,not set*/
         QDateTime nowTime=QDateTime::currentDateTime();
-        QString tmpFileName=QDir::tempPath()+"/SimpleSniffer~"+nowTime.toString("yyyy-MM-dd~hh-mm-ss")+".tmp";
+        LOG(QDir::tempPath().toLatin1().data());
+        currentFile=QDir::tempPath()+"/SimpleSniffer~"+nowTime.toString("yyyy-MM-dd~hh-mm-ss")+".tmp";
 
-        LOG("WRONG2");
-
-        pCaptureThread=new CaptureThread(sniffer, tmpFileName, view, filter);
-
-        //pCaptureThread->setCondition();
+        if(pCaptureThread != NULL) delete pCaptureThread;
+        pCaptureThread=new CaptureThread(sniffer, currentFile, view, filter);
         pCaptureThread->start();
     }
     else {
@@ -132,14 +129,15 @@ bool MainWindow::saveFile(QString saveFileName)
  */
 void MainWindow::open()
 {
-    QString saveFileName = QFileDialog::getOpenFileName(this, tr("Open ... "), ".", tr("Sniffer captured data (*.pcap)"));
-    if (!saveFileName.isEmpty()) {
-        if(openFile(saveFileName) == false) {
+    QString openFileName = QFileDialog::getOpenFileName(this, tr("Open ... "), ".", tr("Sniffer captured data (*.pcap)"));
+    LOG(openFileName.toLatin1().data());
+    if (!openFileName.isEmpty()) {
+        if(openFile(openFileName) == false) {
             QMessageBox::warning(this, tr("Open Error"),
                       tr("<h3>Open File Error</h3><p>Something wrong taken place when opening the file"));
         }
         else {
-            changeFile(saveFileName);
+            changeFile(openFileName);
         }
     }
 }
@@ -147,8 +145,9 @@ void MainWindow::open()
 bool MainWindow::openFile(QString openFileName)
 {
     //load data here
-    LOG(openFileName.toLatin1().data());
-    return false;
+    pCaptureThread = new CaptureThread(sniffer, currentFile, view, filter);
+    int re = pCaptureThread->loadFromOfflineFile(openFileName);
+    return (re>0);
 }
 
 bool MainWindow::changeFile(QString newFileName)

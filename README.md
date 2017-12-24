@@ -1,4 +1,4 @@
-# Linux Sniffer (homework)
+# Linux Sniffer
 
 
 ## Dependency
@@ -11,6 +11,7 @@ Please do not push sniffer.pro.user anymore. Conflicts will happen.
 
 ## Code Structure
 * NetworkChoice(Dialog) -- Sniffer
+* FileDialog -- ListView
 * MainWindow
   * CaptureThread
     * Sniffer
@@ -18,23 +19,21 @@ Please do not push sniffer.pro.user anymore. Conflicts will happen.
   * Filter
   * MultiView
     * (inherit) ListView
-      * Packets 
+  * SlideInfo
 
 ## Current tasks
-* IP slides reunited (undo)
-* analyse file type which packets transmit (untested)
-  * I tested a png transmitted by one packet and a jpg transmitted by two packets.
-  * But I am not sure whether it really works... The type conversions are confusing...
+* IP slides reunited (done)
+* analyse file type which packets transmit (done)
 * search and filtrate packets by protocal content (done)
-* clicked right mouse on TreeView can save current packet info to file (finished)
+* clicked right mouse on TreeView can save current packet info to file (done)
 * analyse packets upon different protocols 
   * implement code in capturethread.cpp: run
   * show brief packets' info in List View (finished)
-  * show detail in a tree structure (untested)
-  * show hex raw data in Text View (untested)
+  * show detail in a tree structure (done)
+  * show hex raw data in Text View (done)
 * file operation
-  * choose a file to save captured data (untested)
-  * load a file with packets' data  (untested)
+  * choose a file to save captured data (done)
+  * load a file with packets' data  (done)
 * packets filter (finished)
   * set standard rules and check user's input (finished)
   * filtrate packets with fixed rules (finished)

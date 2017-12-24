@@ -52,7 +52,8 @@ typedef struct _arp_header
 
 //以太网帧类型　　　　　　　　　对应编码
 #define EPT_IP                (2048)
-#define EPT_ARP               (2054)   
+#define EPT_ARP               (2054)
+#define EPT_IP6               (34525)
 
 
 // IPv4头部（20字节）
@@ -70,6 +71,19 @@ typedef struct _ip_header
     unsigned char		daddr[4];		// 目标地址(Destination address)
     unsigned char       optionData;
 }ip_header;
+
+// IPv6 header
+typedef struct _ipv6_header
+{
+    unsigned version:4;                 //version (4bits)
+    unsigned char traffic;              //traffic class (8bits)
+    unsigned flow:20;                   //flow label (20bits)
+    unsigned short pay_length;          //payload length (16bits)
+    unsigned char next_h;               //next header (8bits)
+    unsigned char hop_limit;            //hop limit (8bits)
+    unsigned char saddr[16];            //source address (128bits)
+    unsigned char daddr[16];            //destination address (128bits)
+}_ipv6_header;
 
 // TCP头部（20字节）
 typedef struct _tcp_header

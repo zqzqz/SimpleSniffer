@@ -23,13 +23,15 @@ protected:
     pcap_dumper_t *pDumpFile; //the file to save packet
 
     bool findAllNetDevs();
-    int capture();   //change from bool to int
+    int capture();
+    int loadFromFile();
 
 public:
     Csniffer();
     ~Csniffer();
     bool openDumpFile(const char* fileName);
-    bool saveCaptureData();
+    bool openOfflineFile(const char* filename);
+    bool saveCaptureData(struct pcap_pkthdr *header=NULL, const u_char *pktData=NULL);
     bool closeDumpFile();
     bool freeNetDevs();
     bool closeNetDevs();

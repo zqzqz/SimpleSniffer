@@ -68,17 +68,9 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata,QB
     tmpSlidePacketInfo.fragmentIdentification=ntohs(iph->identification);
     tmpSlidePacketInfo.fragmentByteData.clear();
     tmpSlidePacketInfo.fragmentheader.clear();
-    //tmpSlidePacketInfo.fragmentByteData.setRawData((const char*)(iph+(iph->ver_ihl & 0x0F)*4),(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
-    //tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
     tmpSlidePacketInfo.fragmentByteData=tmpsnifferdata.strData.mid(14+(iph->ver_ihl & 0x0F)*4,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
     tmpSlidePacketInfo.header=(void*)(iph+(iph->ver_ihl & 0x0F)*4);
     tmpSlidePacketInfo.fragmentheader=rawbyte.mid(14+(iph->ver_ihl & 0x0F)*4,(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
-
-    //tmpSlidePacketInfo.fragmenthead.setRawData((const char*)(resniffer.pktData+14+(iph->ver_ihl & 0x0F)*4),)
-    //tmpSlidePacketInfo.fragmentByteData.resize((ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4));
-    /*for(int i=0;i<(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4);i++) {
-        tmpSlidePacketInfo.fragmentByteData.append(tmpsnifferdata.strData[51+i]);
-    }*/
 
 
     QString testbytedata=tmpSlidePacketInfo.fragmentheader.toHex().toUpper();
@@ -87,27 +79,16 @@ bool SlideInfo::checkWhetherSlide(_ip_header* iph,SnifferData &tmpsnifferdata,QB
     testbyte1.append(testbytedata[1]);
     testbyte1.append(testbytedata[2]);
     testbyte1.append(testbytedata[3]);
-    LOG(testbyte1.toStdString());
 
 
     tmpSlidePacketInfo.nextFragmentOffset=(ntohs(iph->tlen)-(iph->ver_ihl & 0x0F)*4)/8+tmpSlidePacketInfo.fragmentOffset; //the unit of offset is 8 bytes
 
-
-    LOG("OFFSET");
-    LOG(tmpSlidePacketInfo.fragmentOffset);
-    LOG(tmpSlidePacketInfo.fragmentByteData.size());
-
-    QString test=testbytedata;
-    //test=tmpSlidePacketInfo.fragmentByteData;
-
-    LOG("plug in 1");
     if(!(tmpSlidePacketInfo.fragmentFlag==1||tmpSlidePacketInfo.fragmentOffset!=0)) {
         return false;
     } else {
         insertPacket(tmpSlidePacketInfo);
-        //LOG("back to check");
         rebuildInfo();
-        //LOG("back to check after rebuild");
+
         return true;
     }
 
