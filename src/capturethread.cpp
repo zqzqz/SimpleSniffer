@@ -133,6 +133,7 @@ int CaptureThread::takeOnePacket(pcap_pkthdr *header, const u_char *pktData)
 
     int flag;
     flag=0;
+    bool ipv4_flag;
 
     unsigned short sport=0,dport=0;
     unsigned char* sip;
@@ -158,12 +159,25 @@ int CaptureThread::takeOnePacket(pcap_pkthdr *header, const u_char *pktData)
             //iph=new _ip_header();
             //memcpy(iph, pktData+14, sizeof(_ip_header));
             tmpSnifferData.protoInfo.pip = (void*) iph;
-            tmpSnifferData.protoInfo.ipFlag = EPT_IP;
+            //if((eth->eth_type)==2048) {
+                tmpSnifferData.protoInfo.ipFlag = EPT_IP;
+                ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
+                sip = iph->saddr;
+                dip = iph->daddr;
+             //   ipv4_flag=true;
+
+            //} else if(htons(eth->eth_type)==34525){
+              //  tmpSnifferData.protoInfo.ipFlag = EPT_IP6;
+                //ipv4_flag==false;
+
+            //}
+
+            //tmpSnifferData.protoInfo.ipFlag = EPT_IP;
 
             //get length of ip header
-            ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
-            sip = iph->saddr;
-            dip = iph->daddr;
+            //ip_lenth=(iph->ver_ihl &0xF)*4;  //get lenth of ip title
+            //sip = iph->saddr;
+            //dip = iph->daddr;
 
             //above:finished processing ip header
 /**************************************ip slide and rebuild*************************************/
@@ -346,8 +360,10 @@ int CaptureThread::takeOnePacket(pcap_pkthdr *header, const u_char *pktData)
     }
     char strsip[40], strdip[40];
     if (htons(eth->eth_type)==34525) {
-        sprintf(strsip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", sip[0],sip[1],sip[2],sip[3],sip[4],sip[5],sip[6],sip[7]);
-        sprintf(strdip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", dip[0],dip[1],dip[2],dip[3],dip[4],dip[5],dip[6],dip[7]);
+        //sprintf(strsip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", sip[0],sip[1],sip[2],sip[3],sip[4],sip[5],sip[6],sip[7]);
+        //sprintf(strdip, "%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x", dip[0],dip[1],dip[2],dip[3],dip[4],dip[5],dip[6],dip[7]);
+        sprintf(strsip, "%x:%x:%x:%x:%x:%x:%x:%x", ntohs(sip[0]),ntohs(sip[2]),ntohs(sip[4]),ntohs(sip[6]),ntohs(sip[8]),ntohs(sip[10]),ntohs(sip[12]),ntohs(sip[14]));
+        sprintf(strdip, "%x:%x:%x:%x:%x:%x:%x:%x", ntohs(dip[0]),ntohs(dip[2]),ntohs(dip[4]),ntohs(dip[6]),ntohs(dip[8]),ntohs(dip[10]),ntohs(dip[12]),ntohs(dip[14]));
     }
     else {
         sprintf(strsip,"%d.%d.%d.%d",sip[0],sip[1],sip[2],sip[3]);

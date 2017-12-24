@@ -267,6 +267,7 @@ void MultiView::setTreeViewByIndex(SnifferData snifferData)
         item->appendRow(itemChild);
         itemChild = new QStandardItem(QObject::tr("Target IP Adress: ")+dip);
         item->appendRow(itemChild);
+        break;
     }
     case(EPT_IP6): {
         item = new QStandardItem(QObject::tr("Internet Protocol (IPv6)"));
